@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Libre+Caslon+Text:wght@400;700&family=Cinzel:wght@400;700&display=swap');
+
+:root {
+  /* V1 Light Theme Colors */
+  --color-surface: #FFFFF0;
+  --color-surface-variant: #f1dfd3;
+  --color-primary: #FF9933;
+
+  --color-primary-container: #ff9933;
+  --color-secondary: #7c572d;
+  --color-tertiary: #006685;
+  --color-on-surface: #231a13;
+  --color-on-surface-variant: #554336;
+  --color-outline: #887364;
+  --color-error: #ba1a1a;
+
+  /* Form/Feature Components Variables Mapped to Light Theme */
+  --bg-darker: var(--color-surface);
+  --bg-dark: #FFFFFF;
+  --bg-card: rgba(0, 0, 0, 0.03);
+  --text-primary: var(--color-on-surface);
+  --text-secondary: var(--color-on-surface-variant);
+  --accent-gold: var(--color-primary);
+  --border-gold: var(--color-outline);
+  --shadow-gold: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  /* Typography */
+  --font-display: 'Libre Caslon Text', serif;
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Spacing & Shapes */
+  --spacing-base: 8px;
+  --padding-container: 20px;
+  --stack-sm: 12px;
+  --stack-md: 24px;
+  --stack-lg: 48px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+[data-theme="dark"] {
+  /* V1 Dark Theme Colors */
+  --color-surface: #0a0a0a;
+  --color-surface-variant: rgba(255, 255, 255, 0.05);
+  --color-primary: #d4af37;
+  --color-primary-container: rgba(212, 175, 55, 0.2);
+  --color-secondary: #a0a0a0;
+  --color-tertiary: #d4af37;
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #a0a0a0;
+  --color-outline: rgba(212, 175, 55, 0.3);
+
+  /* Form/Feature Components Variables Mapped to Dark Theme */
+  --bg-darker: #050505;
+  --bg-dark: #0a0a0a;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --accent-gold: #d4af37;
+  --border-gold: rgba(212, 175, 55, 0.3);
+  --shadow-gold: 0 4px 20px rgba(212, 175, 55, 0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+a {
+  color: var(--color-tertiary);
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+  border-radius: var(--radius-md);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--bg-darker);
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+}
+.text-gradient {
+  color: var(--color-primary);
+}
+.heading-sm {
+  font-size: 1.5rem;
+  font-family: var(--font-heading);
+}
+
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 var(--padding-container);
+}
+
+/* Component Utilities */
+.vedic-button {
+  background-color: var(--color-primary-container);
+  color: white;
+  font-family: var(--font-heading);
+  padding: 12px 24px;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.vedic-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.service-card {
+  background-color: #FFFFFF;
+  border: 1px solid #008080;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+
+.section-heading-container {
+  text-align: center;
+  margin-bottom: var(--stack-lg);
+}
+
+.section-heading {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.divider {
+  width: 60px;
+  height: 2px;
+  background-color: var(--color-primary);
+  margin: 0 auto;
+  position: relative;
+}
+
+.divider::after {
+  content: '✻';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-surface);
+  padding: 0 10px;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+}
+
+/* Spiritual Icons with CSS Filter */
+.spiritual-icon-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justifyContent: center;
+  transition: transform 0.3s ease;
+}
+
+.spiritual-icon-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Filter for Sacred Orange (#FF9933) starting from Black */
+  filter: invert(67%) sepia(91%) saturate(2222%) hue-rotate(358deg) brightness(101%) contrast(106%);
+}
+
+.spiritual-icon-container:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+
+
