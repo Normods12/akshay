@@ -1,0 +1,17 @@
+{
+  "name": "kundali-server",
+  "version": "1.0.0",
+  "description": "Swiss Ephemeris based Vedic astrology calculation server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "swisseph": "^0.5.17",
+    "geo-tz": "^7.0.7",
+    "luxon": "^3.4.4"
+  }
+}

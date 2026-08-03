@@ -1,5 +1,4 @@
 import { 
-  ScrollText, 
   Heart, 
   Briefcase, 
   Baby, 
@@ -10,14 +9,20 @@ import {
   Map, 
   BookOpen,
   Gem,
-  Hand
+  Hand,
+  UserCheck,
+  UserPlus,
+  HeartPulse,
+  Globe,
+  HelpCircle,
+  Award
 } from 'lucide-react';
 
 export const kundliFeatures = [
-  { id: 'kundli-generation', title: 'Online Kundli Generation', icon: ScrollText, description: 'Generate your precise Vedic Kundli instantly with accurate planetary positions and details.' },
-  { id: 'gun-milan', title: 'Kundli Matching / Gun Milan', icon: Heart, description: 'Check Ashtakoot Milan for marriage compatibility with detailed score analysis.' },
-  { id: 'love-report', title: 'Love Report', icon: Heart, description: 'Get deep insights into your love life, compatibility, and relationship prospects.' },
-  { id: 'marriage-report', title: 'Marriage Report', icon: ScrollText, description: 'Analyze marriage timing, spouse characteristics, and married life predictions.' },
+  { id: 'kundli-generation', title: 'Online Kundli Generation', icon: Globe, description: 'Generate your precise Vedic Kundli instantly with accurate planetary positions and details.' },
+  { id: 'gun-milan', title: 'Kundli Matching / Gun Milan', icon: UserCheck, description: 'Check Ashtakoot Milan for marriage compatibility with detailed score analysis.' },
+  { id: 'love-report', title: 'Love Report', icon: HeartPulse, description: 'Get deep insights into your love life, compatibility, and relationship prospects.' },
+  { id: 'marriage-report', title: 'Marriage Report', icon: Award, description: 'Analyze marriage timing, spouse characteristics, and married life predictions.' },
   { id: 'career-report', title: 'Career Report', icon: Briefcase, description: 'Find the best career paths, success timing, and job vs. business analysis.' },
   { id: 'santan-report', title: 'Santan Report', icon: Baby, description: 'Astrological guidance for progeny, timing of childbirth, and remedies.' },
   { id: 'manglik-analysis', title: 'Manglik Analysis', icon: Flame, description: 'Detailed Mangal Dosha check and its effects on your life and marriage.' },
@@ -25,14 +30,13 @@ export const kundliFeatures = [
 ];
 
 export const services = [
-  { id: 'marriage', title: 'Marriage', icon: Heart, description: 'Consultations regarding marriage delays, issues, and successful matchmaking.' },
+  { id: 'marriage', title: 'Marriage', icon: UserPlus, description: 'Consultations regarding marriage delays, issues, and successful matchmaking.' },
   { id: 'career', title: 'Career', icon: Briefcase, description: 'Overcome career hurdles and get guidance on promotion and professional growth.' },
-  { id: 'love-life', title: 'Love Life', icon: Heart, description: 'Remedies for love problems and understanding the course of your relationship.' },
   { id: 'health', title: 'Health', icon: Heart, description: 'Astrological insights into health matters and potential well-being.' },
-  { id: 'business', title: 'Business', icon: Briefcase, description: 'Auspicious times for starting a business, partnerships, and financial growth.' },
+  { id: 'business', title: 'Business', icon: Globe, description: 'Auspicious times for starting a business, partnerships, and financial growth.' },
   { id: 'vastu', title: 'Vastu', icon: Map, description: 'Align your home or workspace with Vastu Shastra principles for prosperity.' },
   { id: 'numerology', title: 'Numerology', icon: Star, description: 'Discover the power of your numbers and how they shape your destiny.' },
-  { id: 'prashn-kundli', title: 'Prashn Kundli', icon: ScrollText, description: 'Get answers to specific questions based on the exact time they are asked.' },
+  { id: 'prashn-kundli', title: 'Prashn Kundli', icon: HelpCircle, description: 'Get answers to specific questions based on the exact time they are asked.' },
   { id: 'palm-reading', title: 'Palm Reading', icon: Hand, description: 'Deep analysis of the lines on your palm to uncover your life path.' },
   { id: 'gemstones', title: 'Gemstones', icon: Gem, description: 'Recommendations for lucky gemstones to enhance positive planetary effects.' }
 ];

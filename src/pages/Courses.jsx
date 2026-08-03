@@ -4,7 +4,7 @@ import SectionHeading from '../components/ui/SectionHeading';
 import VedicButton from '../components/ui/VedicButton';
 import ServiceCard from '../components/ui/ServiceCard';
 import { SunIcon, TelescopeIcon, CardIcon } from '../components/ui/Icons';
-
+import { motion } from 'framer-motion';
 
 const Courses = () => {
   const theme = useTheme();
@@ -25,7 +25,6 @@ const Courses = () => {
       description: "A deep dive into our unique Vedic-Tarot fusion. Learn to read cards through the lens of ancient spiritual archetypes.",
       icon: <CardIcon />
     }
-
   ];
 
   const handleEnroll = (courseTitle) => {
@@ -40,11 +39,17 @@ const Courses = () => {
         <SectionHeading>Mannjyotish Academy</SectionHeading>
         
         {/* Video Feature */}
-        <div style={{ 
-          marginTop: '60px', 
-          marginBottom: '80px',
-          textAlign: 'center'
-        }}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{ 
+            marginTop: '60px', 
+            marginBottom: '80px',
+            textAlign: 'center'
+          }}
+        >
           <h3 style={{ 
             fontFamily: 'var(--font-heading)', 
             marginBottom: '32px',
@@ -58,8 +63,9 @@ const Courses = () => {
             height: 0, 
             overflow: 'hidden',
             borderRadius: '16px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
-            backgroundColor: '#000'
+            boxShadow: 'var(--shadow-gold)',
+            backgroundColor: '#000',
+            border: `1px solid ${theme.colors.outline}33`
           }}>
             <iframe 
               style={{
@@ -75,20 +81,24 @@ const Courses = () => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
               allowFullScreen
             ></iframe>
-
           </div>
-        </div>
+        </motion.div>
 
         {/* Course List */}
         <div style={{ marginBottom: '60px' }}>
-          <h3 style={{ 
+          <motion.h3 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            style={{ 
             fontFamily: 'var(--font-heading)', 
             fontSize: '2rem', 
             marginBottom: '48px',
-            textAlign: 'center'
+            textAlign: 'center',
+            color: theme.colors.text
           }}>
             Available Courses
-          </h3>
+          </motion.h3>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
