@@ -466,9 +466,94 @@ const PlanetsPage = ({ result, gold }) => (
   </div>
 );
 
+// Vimshottari proportions (years) in the standard order
+const VIMSH_ORDER = ['Sun','Moon','Mars','Rahu','Jupiter','Saturn','Mercury','Ketu','Venus'];
+const VIMSH_YEARS = { Sun:6, Moon:10, Mars:7, Rahu:18, Jupiter:16, Saturn:19, Mercury:17, Ketu:7, Venus:20 };
+const TOTAL_YEARS = 120;
+
+function computeSubPeriods(parentLord, parentStart, parentEnd) {
+  // Antar Dasha order starts from the Maha Dasha lord itself
+  const startIdx = VIMSH_ORDER.indexOf(parentLord);
+  const parentDuration = parentEnd - parentStart; // ms
+  const subPeriods = [];
+  let cursor = new Date(parentStart);
+
+  for (let i = 0; i < VIMSH_ORDER.length; i++) {
+    const lord = VIMSH_ORDER[(startIdx + i) % VIMSH_ORDER.length];
+    const fracYears = (VIMSH_YEARS[parentLord] * VIMSH_YEARS[lord]) / TOTAL_YEARS;
+    const durationMs = parentDuration * (VIMSH_YEARS[lord] / TOTAL_YEARS) * (VIMSH_YEARS[parentLord] / TOTAL_YEARS) * (TOTAL_YEARS / VIMSH_YEARS[parentLord]);
+    // Simpler: proportion of parent period
+    const fracOfParent = VIMSH_YEARS[lord] / TOTAL_YEARS;
+    const periodMs = parentDuration * fracOfParent;
+    const start = new Date(cursor);
+    cursor = new Date(cursor.getTime() + periodMs);
+    const end = new Date(cursor);
+    subPeriods.push({ lord, start, end, years: parseFloat(fracYears.toFixed(2)), color: PLANET_COLORS[lord] || gold });
+  }
+  return subPeriods;
+}
+
 const DashaPage = ({ result, gold }) => {
   const now = new Date();
-  const current = result.dashas?.find(d => d.start <= now && d.end >= now);
+  const [selectedMaha, setSelectedMaha] = useState(null); // selected Maha Dasha object
+  const [selectedAntar, setSelectedAntar] = useState(null); // selected Antar Dasha object
+
+  const currentMaha = result.dashas?.find(d => d.start <= now && d.end >= now);
+
+  // Compute Antar Dashas when a Maha Dasha is selected
+  const antarDashas = selectedMaha ? computeSubPeriods(selectedMaha.lord, selectedMaha.start, selectedMaha.end) : [];
+  const currentAntar = antarDashas.find(d => d.start <= now && d.end >= now);
+
+  // Compute Pratyantar Dashas when an Antar Dasha is selected
+  const pratyantarDashas = selectedAntar ? computeSubPeriods(selectedAntar.lord, selectedAntar.start, selectedAntar.end) : [];
+  const currentPratyantar = pratyantarDashas.find(d => d.start <= now && d.end >= now);
+
+  const renderDashaRow = (d, i, isCurrentFn, onClick, isClickable = true) => {
+    const isCurr = isCurrentFn(d);
+    const pct = isCurr ? Math.min(100, ((now - d.start) / (d.end - d.start)) * 100) : (d.end < now ? 100 : 0);
+    const color = d.color || PLANET_COLORS[d.lord] || gold;
+    return (
+      <motion.div key={`${d.lord}-${i}`}
+        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: i * 0.05 }}
+        onClick={isClickable ? () => onClick(d) : undefined}
+        style={{
+          padding: '6px 10px', borderRadius: '8px',
+          border: `1px solid ${isCurr ? color : gold + '22'}`,
+          backgroundColor: isCurr ? `${color}14` : 'transparent',
+          position: 'relative', overflow: 'hidden',
+          cursor: isClickable ? 'pointer' : 'default',
+          transition: 'border-color 0.2s, background-color 0.2s',
+        }}
+        whileHover={isClickable ? { borderColor: `${color}66`, backgroundColor: `${color}0A` } : {}}
+      >
+        {isCurr && (
+          <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1, delay: 0.5 }}
+            style={{ position: 'absolute', bottom: 0, left: 0, height: '2px', backgroundColor: color }} />
+        )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <motion.div
+              animate={isCurr ? { boxShadow: [`0 0 4px ${color}`, `0 0 12px ${color}88`, `0 0 4px ${color}`] } : {}}
+              transition={{ duration: 1.8, repeat: Infinity }}
+              style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: color, flexShrink: 0 }}
+            />
+            <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.77rem', color: isCurr ? color : 'inherit', fontWeight: 700 }}>{d.lord}</span>
+            {isCurr && (
+              <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }}
+                style={{ fontSize: '0.58rem', backgroundColor: color, color: '#000', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>
+                NOW
+              </motion.span>
+            )}
+            {isClickable && <span style={{ fontSize: '0.55rem', opacity: 0.4, marginLeft: '4px' }}>▶</span>}
+          </div>
+          <span style={{ fontSize: '0.62rem', opacity: 0.55 }}>
+            {d.start.getFullYear()}–{d.end.getFullYear()} · {typeof d.years === 'number' ? d.years + 'y' : d.years}
+          </span>
+        </div>
+      </motion.div>
+    );
+  };
 
   return (
     <div style={{ height: '100%', padding: '18px 20px', overflow: 'auto' }}>
@@ -476,6 +561,46 @@ const DashaPage = ({ result, gold }) => {
       <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', color: gold, marginBottom: '1px' }}>Vimshottari Dasha</h2>
       <div style={{ fontSize: '0.68rem', opacity: 0.5, marginBottom: '4px' }}>120-Year Planetary Period Cycle</div>
       <Divider color={gold} />
+
+      {/* Breadcrumb Navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '0.68rem', flexWrap: 'wrap' }}>
+        <motion.span
+          whileHover={{ color: gold }}
+          onClick={() => { setSelectedMaha(null); setSelectedAntar(null); }}
+          style={{ cursor: 'pointer', opacity: !selectedMaha ? 1 : 0.5, color: gold, fontWeight: 700 }}
+        >Maha Dasha</motion.span>
+        {selectedMaha && (
+          <>
+            <span style={{ opacity: 0.4 }}>›</span>
+            <motion.span
+              whileHover={{ color: gold }}
+              onClick={() => setSelectedAntar(null)}
+              style={{ cursor: 'pointer', opacity: !selectedAntar ? 1 : 0.5, color: selectedMaha.color || gold, fontWeight: 700 }}
+            >{selectedMaha.lord} Antar</motion.span>
+          </>
+        )}
+        {selectedAntar && (
+          <>
+            <span style={{ opacity: 0.4 }}>›</span>
+            <span style={{ color: selectedAntar.color || gold, fontWeight: 700 }}>{selectedAntar.lord} Pratyantar</span>
+          </>
+        )}
+      </div>
+
+      {/* Back Button */}
+      {(selectedMaha || selectedAntar) && (
+        <motion.button
+          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+          onClick={() => { if (selectedAntar) { setSelectedAntar(null); } else { setSelectedMaha(null); } }}
+          style={{
+            padding: '4px 12px', borderRadius: '20px', border: `1px solid ${gold}44`,
+            backgroundColor: 'transparent', color: gold, fontFamily: 'var(--font-body)',
+            fontSize: '0.72rem', cursor: 'pointer', marginBottom: '8px',
+          }}
+        >
+          ← Back
+        </motion.button>
+      )}
 
       <div style={{ position: 'relative', paddingLeft: '24px' }}>
         <svg style={{ position: 'absolute', left: '10px', top: 0, bottom: 0, width: '4px', height: '100%' }}>
@@ -485,46 +610,49 @@ const DashaPage = ({ result, gold }) => {
             transition={{ duration: 1.2, ease: 'easeOut' }} />
         </svg>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          {result.dashas?.map((d, i) => {
-            const isCurr = d === current;
-            const pct = isCurr ? Math.min(100, ((now - d.start) / (d.end - d.start)) * 100) : (d.end < now ? 100 : 0);
-            return (
-              <motion.div key={d.lord}
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.07 }}
-                style={{
-                  padding: '6px 10px', borderRadius: '8px',
-                  border: `1px solid ${isCurr ? d.color : gold + '22'}`,
-                  backgroundColor: isCurr ? `${d.color}14` : 'transparent',
-                  position: 'relative', overflow: 'hidden',
-                }}
-              >
-                {isCurr && (
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1, delay: 0.5 }}
-                    style={{ position: 'absolute', bottom: 0, left: 0, height: '2px', backgroundColor: d.color }} />
-                )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <motion.div
-                      animate={isCurr ? { boxShadow: [`0 0 4px ${d.color}`, `0 0 12px ${d.color}88`, `0 0 4px ${d.color}`] } : {}}
-                      transition={{ duration: 1.8, repeat: Infinity }}
-                      style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: d.color, flexShrink: 0 }}
-                    />
-                    <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.77rem', color: isCurr ? d.color : 'inherit', fontWeight: 700 }}>{d.lord}</span>
-                    {isCurr && (
-                      <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }}
-                        style={{ fontSize: '0.58rem', backgroundColor: d.color, color: '#000', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>
-                        NOW
-                      </motion.span>
-                    )}
-                  </div>
-                  <span style={{ fontSize: '0.62rem', opacity: 0.55 }}>{d.start.getFullYear()}–{d.end.getFullYear()} · {d.years}y</span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+        <AnimatePresence mode="wait">
+          {/* Maha Dasha List */}
+          {!selectedMaha && (
+            <motion.div key="maha" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              {result.dashas?.map((d, i) =>
+                renderDashaRow(d, i, (row) => row === currentMaha, (d) => setSelectedMaha(d), true)
+              )}
+              <div style={{ fontSize: '0.6rem', opacity: 0.4, textAlign: 'center', marginTop: '8px' }}>
+                ▶ Click any period to view Antar Dasha
+              </div>
+            </motion.div>
+          )}
+
+          {/* Antar Dasha List */}
+          {selectedMaha && !selectedAntar && (
+            <motion.div key="antar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <div style={{ fontSize: '0.7rem', color: selectedMaha.color || gold, fontWeight: 700, marginBottom: '4px', fontFamily: 'var(--font-heading)' }}>
+                {selectedMaha.lord} · Antar Dasha
+              </div>
+              {antarDashas.map((d, i) =>
+                renderDashaRow(d, i, (row) => row === currentAntar, (d) => setSelectedAntar(d), true)
+              )}
+              <div style={{ fontSize: '0.6rem', opacity: 0.4, textAlign: 'center', marginTop: '8px' }}>
+                ▶ Click any period to view Pratyantar Dasha
+              </div>
+            </motion.div>
+          )}
+
+          {/* Pratyantar Dasha List */}
+          {selectedAntar && (
+            <motion.div key="pratyantar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <div style={{ fontSize: '0.7rem', color: selectedAntar.color || gold, fontWeight: 700, marginBottom: '4px', fontFamily: 'var(--font-heading)' }}>
+                {selectedMaha?.lord} › {selectedAntar.lord} · Pratyantar Dasha
+              </div>
+              {pratyantarDashas.map((d, i) =>
+                renderDashaRow(d, i, (row) => row === currentPratyantar, () => {}, false)
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

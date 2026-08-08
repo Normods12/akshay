@@ -348,7 +348,7 @@ const PlanetDebugTable = ({ result }) => {
         display: 'flex', alignItems: 'center', gap: '10px' }}>
         <span style={{ fontSize: '1rem' }}>🔬</span>
         <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', color: colors.primary, fontWeight: 700 }}>
-          Planet Positions Debug Table
+          Planet Positions Table
         </span>
         <span style={{ fontSize: '0.7rem', opacity: 0.5, marginLeft: 'auto' }}>
           Lahiri Ayanamsha · Swiss Ephemeris
@@ -487,7 +487,7 @@ const FreeKundli = () => {
 
                 {/* Right: Form card */}
                 <motion.div initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}
-                  className="glass-panel"
+                  className="glass-panel kundli-form-card"
                   style={{
                     padding: '36px', borderRadius: '20px',
                     border: `1px solid ${colors.outline}33`,
@@ -503,10 +503,11 @@ const FreeKundli = () => {
                   <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                     <FormField label="Full Name" value={formData.name} onChange={update('name')} placeholder="Enter your full name" required />
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div className="kundli-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                       <FormField label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={update('dateOfBirth')} required />
                       <FormField label="Time of Birth" type="time" value={formData.timeOfBirth} onChange={update('timeOfBirth')} required />
                     </div>
+
 
                     {/* Location Picker */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

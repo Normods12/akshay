@@ -32,7 +32,7 @@ const FreeCalculators = ({ setCurrentPage }) => {
           Discover your cosmic blueprint with our free astrology tools.
         </p>
 
-        <div style={{ 
+        <div className="free-calculators-grid" style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
           gap: '24px',

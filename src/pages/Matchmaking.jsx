@@ -106,9 +106,9 @@ const Matchmaking = () => {
               )}
               
               {/* Form 1: Match by DOB */}
-              <div className="glass-panel" style={{ padding: '40px', borderRadius: '24px', border: `1px solid ${colors.outline}33`, backgroundColor: 'var(--color-surface-variant)', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }}>
+              <div className="glass-panel matchmaking-card" style={{ padding: '40px', borderRadius: '24px', border: `1px solid ${colors.outline}33`, backgroundColor: 'var(--color-surface-variant)', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }}>
                 <h2 style={{ fontFamily: 'var(--font-heading)', color: colors.primary, marginBottom: '24px', textAlign: 'center' }}>Matchmaking by Date of Birth</h2>
-                <form style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }} onSubmit={handleSubmit}>
+                <form className="matchmaking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }} onSubmit={handleSubmit}>
                   
                   {/* Boy's Details */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -117,7 +117,7 @@ const Matchmaking = () => {
                       <label style={{ fontSize: '0.9rem', fontWeight: 600, color: colors.text }}>Name</label>
                       <input type="text" required placeholder="Boy's name" value={boyData.name} onChange={e => updateBoy('name')(e.target.value)} style={inputStyles} />
                     </div>
-                    <div style={{ display: 'flex', gap: '15px' }}>
+                    <div className="matchmaking-row" style={{ display: 'flex', gap: '15px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                         <label style={{ fontSize: '0.9rem', fontWeight: 600, color: colors.text }}>Date of Birth</label>
                         <input type="date" required value={boyData.dateOfBirth} onChange={e => updateBoy('dateOfBirth')(e.target.value)} style={inputStyles} />
@@ -140,7 +140,7 @@ const Matchmaking = () => {
                       <label style={{ fontSize: '0.9rem', fontWeight: 600, color: colors.text }}>Name</label>
                       <input type="text" required placeholder="Girl's name" value={girlData.name} onChange={e => updateGirl('name')(e.target.value)} style={inputStyles} />
                     </div>
-                    <div style={{ display: 'flex', gap: '15px' }}>
+                    <div className="matchmaking-row" style={{ display: 'flex', gap: '15px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                         <label style={{ fontSize: '0.9rem', fontWeight: 600, color: colors.text }}>Date of Birth</label>
                         <input type="date" required value={girlData.dateOfBirth} onChange={e => updateGirl('dateOfBirth')(e.target.value)} style={inputStyles} />
@@ -166,9 +166,10 @@ const Matchmaking = () => {
               </div>
 
               {/* Form 2: Match by Name */}
-              <div className="glass-panel" style={{ padding: '40px', borderRadius: '24px', border: `1px solid ${colors.outline}33`, backgroundColor: 'var(--color-surface-variant)', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }}>
+              <div className="glass-panel matchmaking-card" style={{ padding: '40px', borderRadius: '24px', border: `1px solid ${colors.outline}33`, backgroundColor: 'var(--color-surface-variant)', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }}>
                 <h2 style={{ fontFamily: 'var(--font-heading)', color: colors.primary, marginBottom: '24px', textAlign: 'center' }}>Matchmaking by Name</h2>
-                <form style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }} onSubmit={handleNameSubmit}>
+                <form className="matchmaking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }} onSubmit={handleNameSubmit}>
+
                   
                   {/* Boy's Details */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

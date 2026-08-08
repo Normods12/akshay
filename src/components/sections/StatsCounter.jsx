@@ -38,7 +38,7 @@ const StatsCounter = () => {
   return (
     <section className="section section--alt" style={{ width: '100%' }}>
       <div className="container">
-        <div style={{
+        <div className="stats-counter-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '40px',

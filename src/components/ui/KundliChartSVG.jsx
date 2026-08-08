@@ -102,11 +102,11 @@ const KundliChartSVG = ({ houses = [], ascendant = '', size = 360 }) => {
             const planets    = houseData?.planets || [];
 
             const nPlanets   = planets.length;
-            const lineHeight = nPlanets > 3 ? 9 : 11;
+            const lineHeight = nPlanets > 3 ? 16 : 18;
             const blockHeight = (1 + nPlanets) * lineHeight;
             // Keep the label stack inside the canvas
-            const safeCy = Math.min(Math.max(cy, 14 + blockHeight / 2), H - 14 - blockHeight / 2);
-            const fontSize = nPlanets > 3 ? 8 : 10;
+            const safeCy = Math.min(Math.max(cy, 20 + blockHeight / 2), H - 20 - blockHeight / 2);
+            const fontSize = nPlanets > 3 ? 16 : 18;
             const startY = safeCy - blockHeight / 2 + lineHeight * 0.75;
 
             return (
@@ -128,12 +128,12 @@ const KundliChartSVG = ({ houses = [], ascendant = '', size = 360 }) => {
                   x={cx}
                   y={startY}
                   textAnchor="middle"
-                  fontSize="12"
+                  fontSize="22"
                   fontWeight="bold"
                   fontFamily="'Cinzel', serif"
                   fill={primary}
                   stroke={textOutline}
-                  strokeWidth="2.5"
+                  strokeWidth="3"
                   paintOrder="stroke"
                 >
                   {signNumber}

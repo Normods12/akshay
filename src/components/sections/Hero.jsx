@@ -8,7 +8,6 @@ import MandalaArt from '../ui/MandalaArt';
 
 const Hero = () => {
   const theme = useTheme();
-  const isDark = theme.themeMode === 'dark';
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -26,14 +25,12 @@ const Hero = () => {
   return (
     <section id="hero" className="section" style={{ position: 'relative', overflow: 'hidden', backgroundColor: theme.colors.surface }}>
 
-      {/* Aurora shimmer (dark mode) */}
-      {isDark && (
+      {/* Aurora shimmer — always visible on dark theme */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
           background: 'radial-gradient(ellipse 70% 50% at 30% 20%, rgba(212,175,55,0.06) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 70% 80%, rgba(100,60,180,0.05) 0%, transparent 70%)',
           pointerEvents: 'none', zIndex: 0, animation: 'aurora-shift 12s ease-in-out infinite alternate'
         }} />
-      )}
 
       {/* Mandala background layer — behind all content, left-side anchor */}
       <MandalaArt
@@ -82,7 +79,7 @@ const Hero = () => {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            opacity: isDark ? 0.45 : 0.65
+            opacity: 0.45
           }}
         >
           <source src="/hero-animation/hero-1.mp4" type="video/mp4" />
@@ -146,7 +143,7 @@ const Hero = () => {
                 Book a Consultation
               </VedicButton>
               <button 
-                onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('booking-categories')?.scrollIntoView({ behavior: 'smooth' })}
                 style={{
                   padding: '12px 28px', fontFamily: 'var(--font-heading)', fontWeight: '700',
                   borderRadius: '12px', backgroundColor: 'transparent', color: theme.colors.primary,
@@ -186,9 +183,7 @@ const Hero = () => {
                 alt="Ashay Krishn Goswami"
                 style={{
                   width: '100%', borderRadius: '20px',
-                  boxShadow: isDark
-                    ? `0 20px 60px rgba(0,0,0,0.6), 0 0 40px ${theme.colors.primary}25`
-                    : `0 20px 50px ${theme.colors.primary}22`,
+                  boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 40px ${theme.colors.primary}25`,
                   border: `1px solid ${theme.colors.primary}44`
                 }}
               />

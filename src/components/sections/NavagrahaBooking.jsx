@@ -26,7 +26,7 @@ const NavagrahaBooking = ({ setSelectedFeature }) => {
         Select a planet to book a specific Puja, remedy, or consultation to harmonize its cosmic energy.
       </p>
 
-      <div style={{
+      <div className="navagraha-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: '32px',

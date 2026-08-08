@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Moon, Sun, ChevronDown } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DropdownMenu = ({ title, items, current, setCurrentPage }) => {
@@ -41,7 +41,7 @@ const DropdownMenu = ({ title, items, current, setCurrentPage }) => {
               borderRadius: '12px',
               padding: '12px 0',
               minWidth: '200px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
               zIndex: 100
             }}
           >
@@ -52,7 +52,7 @@ const DropdownMenu = ({ title, items, current, setCurrentPage }) => {
                 style={{
                   padding: '10px 24px',
                   cursor: 'pointer',
-                  color: current === item.id ? theme.colors.primary : 'var(--color-text)',
+                  color: current === item.id ? theme.colors.primary : 'var(--color-on-surface)',
                   fontSize: '0.95rem',
                   transition: 'background 0.2s',
                   backgroundColor: 'transparent'
@@ -63,7 +63,7 @@ const DropdownMenu = ({ title, items, current, setCurrentPage }) => {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.backgroundColor = 'transparent';
-                  e.target.style.color = current === item.id ? theme.colors.primary : 'var(--color-text)';
+                  e.target.style.color = current === item.id ? theme.colors.primary : 'var(--color-on-surface)';
                 }}
               >
                 {item.label}
@@ -76,17 +76,28 @@ const DropdownMenu = ({ title, items, current, setCurrentPage }) => {
   );
 };
 
-const Navbar = ({ currentPage, setCurrentPage, themeMode, toggleTheme }) => {
+const Navbar = ({ currentPage, setCurrentPage }) => {
   const theme = useTheme();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleHomeScroll = (id) => {
     if (currentPage !== 'home') {
       setCurrentPage('home');
-      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 100);
+      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 300);
     } else {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     }
+    setMobileOpen(false);
   };
+
+  const navLinks = [
+    { label: 'Home', action: () => { setCurrentPage('home'); setMobileOpen(false); } },
+    { label: 'Horoscopes', action: () => handleHomeScroll('rashi-section') },
+    { label: 'Online Puja', action: () => { setCurrentPage('puja'); setMobileOpen(false); } },
+    { label: 'Courses', action: () => { setCurrentPage('courses'); setMobileOpen(false); } },
+    { label: 'Shop', action: () => { setCurrentPage('shop'); setMobileOpen(false); } },
+    { label: 'Consultation', action: () => handleHomeScroll('booking-form') },
+  ];
 
   return (
     <motion.nav 
@@ -104,14 +115,43 @@ const Navbar = ({ currentPage, setCurrentPage, themeMode, toggleTheme }) => {
         zIndex: 1000,
         borderBottom: `1px solid ${theme.colors.outline}33`
       }}>
-      <motion.h1 
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        style={{ fontSize: '1.5rem', color: theme.colors.primary, cursor: 'pointer', fontFamily: 'var(--font-heading)' }}
-        onClick={() => setCurrentPage('home')}
+      <a
+        href="/"
+        className="logo"
+        onClick={(e) => {
+          e.preventDefault();
+          setCurrentPage('home');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
       >
-        Mannjyotish
-      </motion.h1>
+        <span className="logo-icon">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 100 100" 
+            fill="currentColor"
+            style={{ display: 'block' }}
+          >
+            <text 
+              x="50" 
+              y="72" 
+              fontSize="75" 
+              textAnchor="middle" 
+              fill="currentColor" 
+              fontFamily="system-ui, -apple-system, 'Devanagari Sangam MN', 'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif"
+              fontWeight="bold"
+            >
+              🕉
+            </text>
+          </svg>
+        </span>
+
+        <span className="logo-text">MANNJYOTISH</span>
+      </a>
+
+
+
+      {/* Desktop Nav */}
       <ul style={{ 
         display: 'flex', 
         gap: '24px', 
@@ -121,7 +161,7 @@ const Navbar = ({ currentPage, setCurrentPage, themeMode, toggleTheme }) => {
         alignItems: 'center', 
         margin: 0,
         fontSize: '0.95rem'
-      }}>
+      }} className="navbar-desktop">
         <motion.li whileHover={{ y: -2 }}>
           <a href="#" onClick={(e) => { e.preventDefault(); setCurrentPage('home'); }} style={{ color: currentPage === 'home' ? theme.colors.primary : 'inherit', transition: 'color 0.3s ease', textDecoration: 'none' }}>Home</a>
         </motion.li>
@@ -140,7 +180,7 @@ const Navbar = ({ currentPage, setCurrentPage, themeMode, toggleTheme }) => {
         </motion.li>
 
         <motion.li whileHover={{ y: -2 }}>
-          <a href="#" onClick={(e) => { e.preventDefault(); setCurrentPage('horoscope'); }} style={{ color: currentPage === 'horoscope' ? theme.colors.primary : 'inherit', transition: 'color 0.3s ease', textDecoration: 'none' }}>Horoscopes</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); handleHomeScroll('rashi-section'); }} style={{ color: 'inherit', transition: 'color 0.3s ease', textDecoration: 'none' }}>Horoscopes</a>
         </motion.li>
 
         <motion.li whileHover={{ y: -2 }}>
@@ -158,48 +198,88 @@ const Navbar = ({ currentPage, setCurrentPage, themeMode, toggleTheme }) => {
         <motion.li whileHover={{ y: -2 }}>
           <a href="#" onClick={(e) => { e.preventDefault(); handleHomeScroll('booking-form'); }} style={{ color: 'inherit', transition: 'color 0.3s ease', textDecoration: 'none' }}>Consultation</a>
         </motion.li>
-
-        <motion.li whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <div 
-            onClick={toggleTheme}
-            style={{
-              width: '56px',
-              height: '28px',
-              backgroundColor: themeMode === 'dark' ? theme.colors.primary : '#ccc',
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0 4px',
-              cursor: 'pointer',
-              position: 'relative',
-              transition: 'background-color 0.3s'
-            }}
-          >
-            <motion.div
-              style={{
-                width: '20px',
-                height: '20px',
-                backgroundColor: '#fff',
-                borderRadius: '50%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-              }}
-              animate={{
-                x: themeMode === 'dark' ? 28 : 0,
-              }}
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            >
-              {themeMode === 'dark' ? (
-                <Moon size={12} color={theme.colors.primary} />
-              ) : (
-                <Sun size={12} color="#f28c38" />
-              )}
-            </motion.div>
-          </div>
-        </motion.li>
       </ul>
+
+      {/* Mobile Hamburger */}
+      <button 
+        className="navbar-mobile-toggle"
+        onClick={() => setMobileOpen(!mobileOpen)}
+        style={{
+          background: 'none', border: 'none', color: theme.colors.primary,
+          cursor: 'pointer', display: 'none', padding: '4px'
+        }}
+      >
+        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              backgroundColor: 'var(--color-surface)',
+              borderBottom: `1px solid ${theme.colors.outline}33`,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+              zIndex: 999, overflow: 'hidden',
+            }}
+            className="navbar-mobile-menu"
+          >
+            {navLinks.map((link, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                onClick={link.action}
+                style={{
+                  padding: '16px 24px',
+                  cursor: 'pointer',
+                  color: 'var(--color-on-surface)',
+                  fontFamily: 'var(--font-heading)',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  borderBottom: `1px solid ${theme.colors.outline}22`,
+                  transition: 'background 0.2s, color 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = `${theme.colors.primary}15`; e.currentTarget.style.color = theme.colors.primary; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-on-surface)'; }}
+              >
+                {link.label}
+              </motion.div>
+            ))}
+            {/* Reports Dropdown inline on mobile */}
+            {['Free Kundli', 'Matchmaking', 'Moon Sign Calculator'].map((label, i) => (
+              <motion.div
+                key={`report-${i}`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: (navLinks.length + i) * 0.05 }}
+                onClick={() => { 
+                  setCurrentPage(['free-kundli', 'matchmaking', 'moon-sign'][i]); 
+                  setMobileOpen(false); 
+                }}
+                style={{
+                  padding: '14px 40px',
+                  cursor: 'pointer',
+                  color: theme.colors.primary,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '0.9rem',
+                  borderBottom: `1px solid ${theme.colors.outline}11`,
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = `${theme.colors.primary}10`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+              >
+                ↳ {label}
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.nav>
   );
 };

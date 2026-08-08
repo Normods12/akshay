@@ -211,7 +211,7 @@ const BookingCategories = ({ setSelectedFeature }) => {
       <MandalaArt 
         variant={1} 
         size="600px" 
-        opacity={0.15} 
+        opacity={0.28} 
         style={{ 
           position: 'absolute', 
           top: '-300px', 
@@ -223,7 +223,7 @@ const BookingCategories = ({ setSelectedFeature }) => {
       <MandalaArt 
         variant={2} 
         size="500px" 
-        opacity={0.12} 
+        opacity={0.22} 
         style={{ 
           position: 'absolute', 
           bottom: '-250px', 
@@ -238,7 +238,7 @@ const BookingCategories = ({ setSelectedFeature }) => {
           Select an area of focus to begin your journey towards clarity and purpose.
         </p>
         
-        <div style={{ 
+        <div className="booking-categories-grid" style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
           gap: '32px',

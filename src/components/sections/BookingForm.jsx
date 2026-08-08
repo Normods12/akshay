@@ -105,7 +105,7 @@ const BookingForm = () => {
       <MandalaArt
         variant={1}
         size="480px"
-        opacity={0.09}
+        opacity={0.28}
         style={{ position: 'absolute', bottom: '-240px', right: '-240px', zIndex: 0, pointerEvents: 'none' }}
       />
       <BookingFormOrbitArt primaryColor={theme.colors.primary} />
@@ -151,14 +151,14 @@ const BookingForm = () => {
         </div>
 
 
-        <form onSubmit={handleWhatsAppSubmit} style={{ padding: '40px' }}>
+        <form onSubmit={handleWhatsAppSubmit} className="booking-form-element" style={{ padding: '40px' }}>
           <div style={{ marginBottom: '24px', opacity: 0.7, fontSize: '0.9rem', textAlign: 'center', color: theme.colors.text }}>
             {bookingType === 'online' 
               ? "1-on-1 Zoom/WhatsApp calls for Birth Charts and Career guidance." 
               : "Rituals performed with tradition at our temple in Bhind."}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          <div className="booking-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
             <div>
               <label style={{ fontSize: '0.875rem', fontWeight: '600', display: 'block', marginBottom: '8px', color: theme.colors.text }}>Name</label>
               <motion.input 
@@ -187,7 +187,8 @@ const BookingForm = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          <div className="booking-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+
             <div>
               <label style={{ fontSize: '0.875rem', fontWeight: '600', display: 'block', marginBottom: '8px', color: theme.colors.text }}>Birth Date</label>
               <motion.input 

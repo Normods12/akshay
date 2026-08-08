@@ -81,7 +81,7 @@ const Testimonials = () => {
       <MandalaArt
         variant={1}
         size="520px"
-        opacity={0.1}
+        opacity={0.28}
         style={{ position: 'absolute', top: '-260px', right: '-260px', zIndex: 0, pointerEvents: 'none' }}
       />
       <TestimonialStarsAndQuotes primaryColor="var(--color-primary)" />
@@ -93,6 +93,7 @@ const Testimonials = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
+        className="testimonials-grid"
         style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 

@@ -103,7 +103,7 @@ const MoonSignCalculator = () => {
 
         <AnimatePresence mode="wait">
           {step === 'form' && (
-            <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="glass-panel" style={{ padding: '40px', borderRadius: '24px', border, backgroundColor: 'var(--color-surface-variant)' }}>
+            <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="glass-panel moonsign-card" style={{ padding: '40px', borderRadius: '24px', border, backgroundColor: 'var(--color-surface-variant)' }}>
               {error && <div style={{ padding: '16px', backgroundColor: '#F4433615', border: '1px solid #F4433655', color: '#F44336', borderRadius: '12px', marginBottom: '24px', textAlign: 'center', fontWeight: 600 }}>{error}</div>}
               
               <form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} onSubmit={handleSubmit}>
@@ -111,7 +111,7 @@ const MoonSignCalculator = () => {
                   <label style={{ fontSize: '0.9rem', fontWeight: 600, color: colors.text }}>Name</label>
                   <input type="text" required placeholder="Your name" value={formData.name} onChange={e => updateForm('name')(e.target.value)} style={inputStyles} />
                 </div>
-                <div style={{ display: 'flex', gap: '15px' }}>
+                <div className="moonsign-row" style={{ display: 'flex', gap: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                     <label style={{ fontSize: '0.9rem', fontWeight: 600, color: colors.text }}>Date of Birth</label>
                     <input type="date" required value={formData.dateOfBirth} onChange={e => updateForm('dateOfBirth')(e.target.value)} style={inputStyles} />
@@ -121,6 +121,7 @@ const MoonSignCalculator = () => {
                     <input type="time" required value={formData.timeOfBirth} onChange={e => updateForm('timeOfBirth')(e.target.value)} style={inputStyles} />
                   </div>
                 </div>
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ fontSize: '0.9rem', fontWeight: 600, color: colors.text }}>Birth Place</label>
                   <LocationPicker required value={formData.birthPlace} onChange={updateForm('birthPlace')} onLocationSelect={updateForm('locationObj')} />

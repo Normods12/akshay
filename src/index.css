@@ -1,28 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Libre+Caslon+Text:wght@400;700&family=Cinzel:wght@400;700&display=swap');
 
+/* ── PERMANENT DARK THEME ─────────────────────────────────────────── */
 :root {
-  /* V1 Light Theme Colors */
-  --color-surface: #FFFFF0;
-  --color-surface-variant: #f1dfd3;
-  --color-primary: #FF9933;
-
-  --color-primary-container: rgba(255, 153, 51, 0.15);
-  --color-secondary: #7c572d;
-  --color-tertiary: #006685;
-  --color-on-surface: #231a13;
-  --color-on-surface-variant: #554336;
-  --color-outline: #887364;
+  --color-surface: #0a0a0a;
+  --color-surface-variant: rgba(255, 255, 255, 0.05);
+  --color-primary: #d4af37;
+  --color-primary-container: rgba(212, 175, 55, 0.2);
+  --color-secondary: #a0a0a0;
+  --color-tertiary: #d4af37;
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #a0a0a0;
+  --color-outline: rgba(212, 175, 55, 0.3);
   --color-error: #ba1a1a;
 
-  /* Form/Feature Components Variables Mapped to Light Theme */
-  --bg-darker: var(--color-surface);
-  --bg-dark: #FFFFFF;
-  --bg-card: rgba(0, 0, 0, 0.03);
-  --text-primary: var(--color-on-surface);
-  --text-secondary: var(--color-on-surface-variant);
-  --accent-gold: var(--color-primary);
-  --border-gold: var(--color-outline);
-  --shadow-gold: 0 4px 12px rgba(0, 0, 0, 0.05);
+  /* Form/Feature Components */
+  --bg-darker: #050505;
+  --bg-dark: #0a0a0a;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --accent-gold: #d4af37;
+  --border-gold: rgba(212, 175, 55, 0.3);
+  --shadow-gold: 0 4px 20px rgba(212, 175, 55, 0.15);
 
   /* Typography */
   --font-display: 'Libre Caslon Text', serif;
@@ -39,13 +38,70 @@
   --radius-md: 12px;
   --radius-lg: 16px;
 
-  /* Section rhythm — single source of truth for vertical spacing */
+  /* Section rhythm */
   --section-py: 64px;
   --section-gap: 0px;
 }
 
+/* ── NAVBAR BRAND LOGO ────────────────────────────────────────────── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logo-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #d4af37;
+  border: 2px solid #d4af37;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.08);
+  box-shadow:
+    0 0 8px rgba(212, 175, 55, 0.25),
+    inset 0 0 10px rgba(212, 175, 55, 0.15);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.logo-text {
+  font-family: 'Cinzel', serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  transition: text-shadow 0.35s ease;
+  background: linear-gradient(
+    180deg,
+    #f8e7a0 0%,
+    #d4af37 45%,
+    #a87d12 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo:hover .logo-icon {
+  transform: rotate(8deg) scale(1.06);
+  box-shadow:
+    0 0 16px rgba(212, 175, 55, 0.45),
+    inset 0 0 12px rgba(212, 175, 55, 0.25);
+}
+
+.logo:hover .logo-text {
+  text-shadow:
+    0 0 10px rgba(212, 175, 55, 0.5),
+    0 0 20px rgba(212, 175, 55, 0.25);
+}
+
+/* data-theme="dark" mirrors :root now — kept for backward-compat with any inline references */
 [data-theme="dark"] {
-  /* V1 Dark Theme Colors */
+
   --color-surface: #0a0a0a;
   --color-surface-variant: rgba(255, 255, 255, 0.05);
   --color-primary: #d4af37;
@@ -55,8 +111,6 @@
   --color-on-surface: #ffffff;
   --color-on-surface-variant: #a0a0a0;
   --color-outline: rgba(212, 175, 55, 0.3);
-
-  /* Form/Feature Components Variables Mapped to Dark Theme */
   --bg-darker: #050505;
   --bg-dark: #0a0a0a;
   --bg-card: rgba(255, 255, 255, 0.03);
@@ -65,78 +119,6 @@
   --accent-gold: #d4af37;
   --border-gold: rgba(212, 175, 55, 0.3);
   --shadow-gold: 0 4px 20px rgba(212, 175, 55, 0.15);
-}
-
-/* ── PALETTE A — Indigo & Gold ─────────────────────────────────────── */
-/* Deep indigo headings, antique gold accents, warm cream surface       */
-[data-theme="palette-a"] {
-  --color-surface:          #FAF6EE;
-  --color-surface-variant:  #EDE4D4;
-  --color-primary:          #1E2749;
-  --color-primary-container: rgba(30, 39, 73, 0.10);
-  --color-secondary:        #C9A227;
-  --color-tertiary:         #8B4513;
-  --color-on-surface:       #1A1612;
-  --color-on-surface-variant: #3D3020;
-  --color-outline:          #A08020;
-  --color-error:            #ba1a1a;
-
-  --bg-darker:    #FAF6EE;
-  --bg-dark:      #FFFFFF;
-  --bg-card:      rgba(201, 162, 39, 0.04);
-  --text-primary: #1A1612;
-  --text-secondary: #3D3020;
-  --accent-gold:  #C9A227;
-  --border-gold:  #C9A22744;
-  --shadow-gold:  0 4px 12px rgba(201, 162, 39, 0.15);
-}
-
-/* ── PALETTE B — Terracotta & Sage ─────────────────────────────────── */
-/* Muted terracotta primary, charcoal text, sage-green tertiary accent  */
-[data-theme="palette-b"] {
-  --color-surface:          #F3E9DC;
-  --color-surface-variant:  #E8D9C8;
-  --color-primary:          #C15B3E;
-  --color-primary-container: rgba(193, 91, 62, 0.12);
-  --color-secondary:        #2B2622;
-  --color-tertiary:         #5C6B4E;
-  --color-on-surface:       #1C1410;
-  --color-on-surface-variant: #4A3C30;
-  --color-outline:          #9B7B5A;
-  --color-error:            #ba1a1a;
-
-  --bg-darker:    #F3E9DC;
-  --bg-dark:      #FBF5EC;
-  --bg-card:      rgba(193, 91, 62, 0.05);
-  --text-primary: #1C1410;
-  --text-secondary: #4A3C30;
-  --accent-gold:  #C15B3E;
-  --border-gold:  #9B7B5A55;
-  --shadow-gold:  0 4px 12px rgba(193, 91, 62, 0.08);
-}
-
-/* ── PALETTE C — Maroon & Brass ─────────────────────────────────────── */
-/* Deep maroon CTAs, brass/bronze gold touch, teal kept from original   */
-[data-theme="palette-c"] {
-  --color-surface:          #FCF8F2;
-  --color-surface-variant:  #F0E8DA;
-  --color-primary:          #6E1F2A;
-  --color-primary-container: rgba(110, 31, 42, 0.10);
-  --color-secondary:        #B08D57;
-  --color-tertiary:         #006685;
-  --color-on-surface:       #1A1010;
-  --color-on-surface-variant: #3D2020;
-  --color-outline:          #9A7A45;
-  --color-error:            #ba1a1a;
-
-  --bg-darker:    #FCF8F2;
-  --bg-dark:      #FFFFFF;
-  --bg-card:      rgba(176, 141, 87, 0.05);
-  --text-primary: #1A1010;
-  --text-secondary: #3D2020;
-  --accent-gold:  #B08D57;
-  --border-gold:  #B08D5742;
-  --shadow-gold:  0 4px 12px rgba(176, 141, 87, 0.12);
 }
 
 * {
@@ -450,14 +432,237 @@ button {
 }
 
 /* ── Responsive helpers ───────────────────────────────────────────── */
+
+/* Navbar: hide desktop links, show hamburger on mobile */
+
+/* ── Mobile Responsive Overrides (max-width: 768px) ────────────────────────── */
 @media (max-width: 768px) {
   :root {
-    --section-py: 40px;
+    --section-py: 36px;
   }
   .container {
-    padding: 0 16px;
+    padding: 0 14px;
   }
   .section-heading {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+  }
+
+  /* Navbar */
+  .navbar-desktop {
+    display: none !important;
+  }
+  .navbar-mobile-toggle {
+    display: block !important;
+  }
+  nav {
+    padding: 12px 16px !important;
+  }
+  .logo-icon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 19px !important;
+  }
+  .logo-text {
+    font-size: 1.25rem !important;
+    letter-spacing: 1px !important;
+  }
+
+
+  /* Hero */
+  #hero .container > div {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+
+  /* 1. Daily Horoscope Mobile Layout: 1 2, 3 4, 5 6, (h), 7 8, 9 10, 11 12 */
+  .rashi-4col-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .rashi-lottie-center {
+    grid-column: span 2 !important;
+    grid-row: auto !important;
+    min-height: 220px !important;
+  }
+
+  /* 2. Book Consultation Mobile Layout: 2 in a row + Center Aligned Text */
+  .booking-categories-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .booking-categories-grid > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 14px 10px !important;
+  }
+  .booking-categories-grid h3,
+  .booking-categories-grid p,
+  .booking-categories-grid div {
+    text-align: center !important;
+  }
+  .booking-categories-grid h3 {
+    font-size: 0.9rem !important;
+  }
+  .booking-categories-grid p {
+    font-size: 0.72rem !important;
+    line-height: 1.3 !important;
+  }
+
+  /* 3. Free Calculators Mobile Layout: Equal sized cards, 1 & 2 on top, 3 centered in middle */
+  .free-calculators-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+  .free-calculators-grid > div {
+    padding: 20px 12px !important;
+    min-height: 160px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  .free-calculators-grid > div:nth-child(3) {
+    grid-column: 1 / span 2 !important;
+    width: 100% !important;
+    max-width: 80% !important;
+    justify-self: center !important;
+    margin: 0 auto !important;
+  }
+  .free-calculators-grid h3 {
+    font-size: 0.98rem !important;
+    margin-bottom: 6px !important;
+    text-align: center !important;
+  }
+  .free-calculators-grid p {
+    font-size: 0.78rem !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    text-align: center !important;
+  }
+
+
+  /* 4. Navagraha Shanti Mobile Layout: 2 in a row */
+  .navagraha-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .navagraha-grid > div {
+    padding: 14px 10px !important;
+  }
+  .navagraha-grid h3 {
+    font-size: 0.9rem !important;
+  }
+  .navagraha-grid p {
+    font-size: 0.72rem !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* 5. Stats Counter Section: 2x2 compact grid on mobile */
+  .stats-counter-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px 10px !important;
+  }
+  .stats-counter-grid > div > div:first-child {
+    font-size: 1.8rem !important;
+  }
+  .stats-counter-grid > div > div:last-child {
+    font-size: 0.8rem !important;
+  }
+
+  /* 6. Schedule Your Session Form: Fix Birth time & inputs from overflowing */
+  .booking-form-element {
+    padding: 24px 14px !important;
+  }
+  .booking-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .booking-form-element input,
+  .booking-form-element textarea {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 7. Calculator Forms Mobile Responsiveness (Free Kundli, Matchmaking, Moon Sign) */
+  .kundli-form-card,
+  .matchmaking-card,
+  .moonsign-card {
+    padding: 20px 14px !important;
+  }
+  .matchmaking-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  .kundli-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .matchmaking-row,
+  .moonsign-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .kundli-form-card input,
+  .matchmaking-card input,
+  .moonsign-card input,
+  .kundli-form-card button,
+  .matchmaking-card button,
+  .moonsign-card button {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+
+
+  /* 5. What People Say Mobile Layout: compact cards so all 3 fit in one screen view */
+  .testimonials-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    margin-top: 20px !important;
+  }
+  .testimonials-grid > div {
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+  }
+  .testimonials-grid p {
+    font-size: 0.78rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 6px !important;
+  }
+  .testimonials-grid h4 {
+    font-size: 0.82rem !important;
+  }
+  .testimonials-grid span {
+    font-size: 0.7rem !important;
+  }
+
+  /* Puja page */
+  .puja-grid {
+    grid-template-columns: 1fr !important;
   }
 }
+
+
+
+
+
+/* Desktop: show desktop links, hide hamburger */
+@media (min-width: 769px) {
+  .navbar-mobile-toggle {
+    display: none !important;
+  }
+  .navbar-mobile-menu {
+    display: none !important;
+  }
+}
+

@@ -18,35 +18,22 @@ import FreeKundli from './pages/FreeKundli';
 import Matchmaking from './pages/Matchmaking';
 import MoonSignCalculator from './pages/MoonSignCalculator';
 import Shop from './pages/Shop';
-import Horoscope from './pages/Horoscope';
 import Puja from './pages/Puja';
 import { FeatureModal } from './components/FeatureModal';
 import { kundliFeatures, services } from './data/features';
-import PaletteSwitcher from './components/dev/PaletteSwitcher';
-
-
-import { useTheme } from './context/ThemeContext';
 import { useState } from 'react';
-
-
-
-
-import { Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedSign, setSelectedSign] = useState('aries');
   const [selectedFeature, setSelectedFeature] = useState(null);
-  const { themeMode, toggleTheme } = useTheme();
 
   return (
       <div className="app-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)' }}>
         <Navbar 
           currentPage={currentPage} 
           setCurrentPage={setCurrentPage} 
-          themeMode={themeMode} 
-          toggleTheme={toggleTheme} 
         />
 
         <main style={{ flex: 1 }}>
@@ -83,8 +70,6 @@ function App() {
               <Matchmaking key="matchmaking" />
             ) : currentPage === 'shop' ? (
               <Shop key="shop" />
-            ) : currentPage === 'horoscope' ? (
-              <Horoscope key="horoscope" selectedSign={selectedSign} setSelectedSign={setSelectedSign} />
             ) : currentPage === 'puja' ? (
               <Puja key="puja" />
             ) : null}
@@ -98,8 +83,6 @@ function App() {
             onClose={() => setSelectedFeature(null)} 
           />
         )}
-        {/* DEV ONLY — remove PaletteSwitcher import + this line when done */}
-        <PaletteSwitcher />
       </div>
   );
 }

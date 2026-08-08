@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import SectionHeading from '../ui/SectionHeading';
 import MandalaArt from '../ui/MandalaArt';
 import HoroscopeModal from '../ui/HoroscopeModal';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const MagicalDust = () => {
   return (
@@ -213,19 +214,96 @@ const FloatingAstrologyArt = ({ primaryColor }) => {
             height: star.size
           }}
         >
-          <svg viewBox="0 0 24 24" width="100%" height="100%" dangerouslySetInnerHTML={{ __html: i % 2 === 0 ? STARBURST_SVG : ASTRO_RING_SVG }} />
         </motion.div>
       ))}
     </div>
   );
 };
 
+// Rashi Card Component
+const RashiCard = ({ sign, index, onClick, colors }) => (
+  <motion.div
+    key={sign.id}
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay: index * 0.03, duration: 0.4 }}
+    whileHover={{ y: -5, scale: 1.02 }}
+    onClick={onClick}
+    className="glass-panel"
+    style={{
+      padding: '16px 10px',
+      borderRadius: '16px',
+      border: '1px solid var(--border-gold)',
+      background: `linear-gradient(145deg, var(--color-surface) 0%, var(--color-surface-variant) 100%)`,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      cursor: 'pointer',
+      boxShadow: `0 4px 12px rgba(0,0,0,0.05)`,
+      textAlign: 'center'
+    }}
+  >
+    <div style={{
+      width: '96px',
+      height: '96px',
+      marginBottom: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '16px',
+      overflow: 'hidden'
+    }}>
+      <img 
+        src={`/icons-horoscope/${sign.image}`} 
+        alt={sign.name}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain'
+        }}
+      />
+    </div>
+    
+    <h3 style={{ 
+      fontFamily: 'var(--font-heading)', 
+      color: colors.text, 
+      fontSize: '0.95rem', 
+      marginBottom: '2px' 
+    }}>
+      {sign.name}
+    </h3>
+    <span style={{ 
+      fontSize: '0.7rem', 
+      color: colors.primary, 
+      opacity: 0.9,
+      marginBottom: '8px',
+      fontWeight: 500
+    }}>
+      ({sign.rashi})
+    </span>
+
+    <div style={{
+      fontSize: '0.65rem',
+      color: colors.secondary,
+      fontWeight: 600,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      paddingTop: '8px',
+      borderTop: `1px solid ${colors.outline}33`,
+      width: '100%'
+    }}>
+      View
+    </div>
+  </motion.div>
+);
+
 const RashiBox = ({ setCurrentPage, setSelectedSign }) => {
-  const { colors, themeMode } = useTheme();
+  const { colors } = useTheme();
   const [modalSign, setModalSign] = useState(null);
 
   return (
-    <section className="section" style={{ position: 'relative', overflow: 'hidden' }}>
+    <section id="rashi-section" className="section" style={{ position: 'relative', overflow: 'hidden' }}>
       <FloatingAstrologyArt primaryColor={colors.primary} />
       <MandalaArt
         variant={2}
@@ -239,153 +317,94 @@ const RashiBox = ({ setCurrentPage, setSelectedSign }) => {
         Select your Moon Sign (Janam Rashi) to read your daily astrological insights.
       </p>
 
-      <div style={{
+      {/* 4-Column Layout (Desktop) / Sequential 2-Column Layout (Mobile: 1-6, Lottie, 7-12) */}
+      <div className="rashi-4col-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '40px',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '16px',
         alignItems: 'center'
       }}>
-        {/* Left Side: Zodiac Image with Magical Powers */}
-        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {/* Pulsing Aura Background */}
-          <motion.div
-            animate={{
-              scale: [1, 1.05, 1],
-              opacity: [0.5, 0.8, 0.5],
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        {/* Row 1: Cards 1 to 4 (Aries, Taurus, Gemini, Cancer) */}
+        {ZODIAC_SIGNS.slice(0, 4).map((sign, index) => (
+          <div key={sign.id} style={{ order: index + 1 }}>
+            <RashiCard sign={sign} index={index} onClick={() => setModalSign(sign.id)} colors={colors} />
+          </div>
+        ))}
+
+        {/* Card 5 (Leo) */}
+        <div style={{ order: 5 }}>
+          <RashiCard sign={ZODIAC_SIGNS[4]} index={4} onClick={() => setModalSign(ZODIAC_SIGNS[4].id)} colors={colors} />
+        </div>
+
+        {/* Card 6 (Virgo) — Order 6 */}
+        <div style={{ order: 6 }}>
+          <RashiCard sign={ZODIAC_SIGNS[5]} index={5} onClick={() => setModalSign(ZODIAC_SIGNS[5].id)} colors={colors} />
+        </div>
+
+        {/* Central Astrology Lottie Animation — Order 7 on Mobile */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="rashi-lottie-center"
+          style={{
+            gridColumn: '2 / span 2',
+            gridRow: '2 / span 2',
+            order: 7,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            padding: '10px',
+            width: '100%',
+            height: '100%'
+          }}
+        >
+          {/* Background Golden Glow */}
+          <div style={{
+            position: 'absolute',
+            width: '90%',
+            height: '90%',
+            background: 'radial-gradient(circle, rgba(212,175,55,0.18) 0%, transparent 70%)',
+            filter: 'blur(35px)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }} />
+
+          <DotLottieReact
+            src="/Astrology.lottie"
+            loop
+            autoplay
+            renderConfig={{ preserveAspectRatio: 'xMidYMid meet' }}
             style={{
-              position: 'absolute',
-              top: '5%', left: '5%', right: '5%', bottom: '5%',
-              background: 'radial-gradient(circle, var(--color-primary) 0%, transparent 70%)',
-              filter: 'blur(40px)',
-              zIndex: 0
+              width: '100%',
+              height: '100%',
+              maxWidth: '420px',
+              maxHeight: '420px',
+              aspectRatio: '1 / 1',
+              objectFit: 'contain',
+              zIndex: 1
             }}
           />
-          
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            animate={{ 
-              y: [0, -15, 0]
-            }}
-            transition={{ 
-              y: { duration: 5, repeat: Infinity, ease: 'easeInOut' },
-              opacity: { duration: 0.8 },
-              x: { duration: 0.8 }
-            }}
-            style={{ 
-              width: '100%', 
-              zIndex: 1, 
-              borderRadius: '24px', 
-              position: 'relative',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
-            }}
-          >
-            <MagicalDust />
-            <img 
-              src="/horoscope.jpg" 
-              alt="Cosmic Zodiac Wheel" 
-              style={{
-                width: '100%',
-                borderRadius: '24px',
-                border: '1px solid var(--border-gold)',
-                objectFit: 'cover',
-                display: 'block',
-                position: 'relative',
-                zIndex: 1
-              }}
-            />
-          </motion.div>
+        </motion.div>
+
+        {/* Card 7 (Libra) — Order 8 */}
+        <div style={{ order: 8 }}>
+          <RashiCard sign={ZODIAC_SIGNS[6]} index={6} onClick={() => setModalSign(ZODIAC_SIGNS[6].id)} colors={colors} />
         </div>
 
-        {/* Right Side: Interactive Rashi Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-          gap: '16px',
-          justifyContent: 'center'
-        }}>
-          {ZODIAC_SIGNS.map((sign, index) => (
-            <motion.div
-              key={sign.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.03, duration: 0.4 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-              onClick={() => {
-                setModalSign(sign.id);
-              }}
-              className="glass-panel"
-              style={{
-                padding: '20px 12px',
-                borderRadius: '16px',
-                border: '1px solid var(--border-gold)',
-                background: `linear-gradient(145deg, var(--color-surface) 0%, var(--color-surface-variant) 100%)`,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                cursor: 'pointer',
-                boxShadow: `0 4px 12px rgba(0,0,0,0.05)`,
-                textAlign: 'center'
-              }}
-            >
-              <div style={{
-                width: '136px',
-                height: '136px',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '16px',
-                overflow: 'hidden'
-              }}>
-                <img 
-                  src={`/icons-horoscope/${sign.image}`} 
-                  alt={sign.name}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain'
-                  }}
-                />
-              </div>
-              
-              <h3 style={{ 
-                fontFamily: 'var(--font-heading)', 
-                color: colors.text, 
-                fontSize: '1.05rem', 
-                marginBottom: '2px' 
-              }}>
-                {sign.name}
-              </h3>
-              <span style={{ 
-                fontSize: '0.75rem', 
-                color: colors.primary, 
-                opacity: 0.9,
-                marginBottom: '10px',
-                fontWeight: 500
-              }}>
-                ({sign.rashi})
-              </span>
-
-              <div style={{
-                fontSize: '0.7rem',
-                color: colors.secondary,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                paddingTop: '10px',
-                borderTop: `1px solid ${colors.outline}33`,
-                width: '100%'
-              }}>
-                View
-              </div>
-            </motion.div>
-          ))}
+        {/* Card 8 (Scorpio) — Order 9 */}
+        <div style={{ order: 9 }}>
+          <RashiCard sign={ZODIAC_SIGNS[7]} index={7} onClick={() => setModalSign(ZODIAC_SIGNS[7].id)} colors={colors} />
         </div>
+
+        {/* Row 4: Cards 9 to 12 (Sagittarius, Capricorn, Aquarius, Pisces) — Orders 10 to 13 */}
+        {ZODIAC_SIGNS.slice(8, 12).map((sign, index) => (
+          <div key={sign.id} style={{ order: index + 10 }}>
+            <RashiCard sign={sign} index={index + 8} onClick={() => setModalSign(sign.id)} colors={colors} />
+          </div>
+        ))}
       </div>
       </div>
 
