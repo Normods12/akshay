@@ -30,8 +30,20 @@ const PORT = process.env.PORT || 3001;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mannjyotishashay@gmail.com';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://mannjyotish.com';
 const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || `${FRONTEND_URL}/api/auth/google/callback`;
+
+const getFrontendUrl = (req) => {
+  if (process.env.FRONTEND_URL) return process.env.FRONTEND_URL.replace(/\/$/, '');
+  if (req) {
+    const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers?.host;
+    if (host && !host.includes('localhost')) {
+      return `${proto}://${host}`;
+    }
+  }
+  return 'https://mannjyotish.com';
+};
 const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_dummy_key_for_development';
 const GCAL_REFRESH_TOKEN = process.env.GCAL_REFRESH_TOKEN;
 
@@ -270,18 +282,23 @@ app.get('/api/auth/google', (req, res, next) => {
 });
 
 app.get('/api/auth/google/callback', (req, res, next) => {
+  const targetFrontend = getFrontendUrl(req);
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    return res.redirect(`${FRONTEND_URL}/?auth=failed`);
+    return res.redirect(`${targetFrontend}/?auth=failed`);
   }
-  passport.authenticate('google', { session: false, failureRedirect: `${FRONTEND_URL}/?auth=failed` })(req, res, (err) => {
-    if (err) return res.redirect(`${FRONTEND_URL}/?auth=failed`);
+  passport.authenticate('google', { session: false, failureRedirect: `${targetFrontend}/?auth=failed` })(req, res, (err) => {
+    if (err) {
+      console.error('Google auth callback error:', err);
+      return res.redirect(`${targetFrontend}/?auth=failed`);
+    }
     const user = req.user;
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, picture: user.picture, role: user.role },
       JWT_SECRET,
       { expiresIn: '30d' }
     );
-    res.redirect(`${FRONTEND_URL}/?token=${token}`);
+    console.log(`✅ Google Auth Success for ${user.email}, redirecting to ${targetFrontend}/?token=...`);
+    res.redirect(`${targetFrontend}/?token=${token}`);
   });
 });
 
