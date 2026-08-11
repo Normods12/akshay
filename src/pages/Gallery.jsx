@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/auth/LoginModal';
 import MandalaArt from '../components/ui/MandalaArt';
 
-const API_BASE = 'http://localhost:3001';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 export default function Gallery({ setCurrentPage }) {
   const { isLoggedIn } = useAuth();

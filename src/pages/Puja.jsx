@@ -190,7 +190,7 @@ const PujaCard = ({ puja, index, onBookService }) => {
         <motion.img
           whileHover={{ scale: 1.07 }}
           transition={{ duration: 0.5 }}
-          src={puja.image ? (puja.image.startsWith('/uploads') ? `http://localhost:3001${puja.image}` : puja.image) : '/images/puja_navagraha.png'}
+          src={puja.image ? (puja.image.startsWith('/uploads') ? `${import.meta.env.VITE_API_BASE || ''}${puja.image}` : puja.image) : '/images/puja_navagraha.png'}
           alt={puja.title}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           onError={(e) => {
@@ -301,12 +301,7 @@ const Puja = ({ onBookService }) => {
           setLivePujas(data.data);
         }
       })
-      .catch(() => {
-        fetch('http://localhost:3001/api/pujas')
-          .then(r => r.json())
-          .then(d => { if (d.data && d.data.length > 0) setLivePujas(d.data); })
-          .catch(e => console.warn('Pujas fetch warning:', e));
-      });
+      .catch(e => console.warn('Pujas fetch warning:', e));
   }, []);
 
   const dynamicCategories = ['All', ...new Set(livePujas.map(p => p.category).filter(Boolean))];

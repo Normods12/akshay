@@ -46,12 +46,7 @@ const Shop = ({ onBookService }) => {
           setItems(data.data);
         }
       })
-      .catch(() => {
-        fetch('http://localhost:3001/api/shop')
-          .then(r => r.json())
-          .then(d => { if (d.data && d.data.length > 0) setItems(d.data); })
-          .catch(e => console.warn('Shop fetch warning:', e));
-      });
+      .catch(e => console.warn('Shop fetch warning:', e));
   }, []);
 
   const handleShopClick = (item) => {
@@ -117,7 +112,7 @@ const Shop = ({ onBookService }) => {
           gap: '30px'
         }}>
           {items.map((item, idx) => {
-            const imgSrc = item.image ? (item.image.startsWith('/uploads') ? `http://localhost:3001${item.image}` : item.image) : '/images/shop_gemstones.png';
+            const imgSrc = item.image ? (item.image.startsWith('/uploads') ? `${import.meta.env.VITE_API_BASE || ''}${item.image}` : item.image) : '/images/shop_gemstones.png';
             const displayPrice = item.price ? (item.price.toString().startsWith('₹') || item.price.toString().toLowerCase().includes('starting') ? item.price : `₹${item.price}`) : 'Price on Request';
 
             return (
