@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import SectionHeading from '../ui/SectionHeading';
 import MandalaArt from '../ui/MandalaArt';
 import HoroscopeModal from '../ui/HoroscopeModal';
+import LoginModal from '../auth/LoginModal';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const MagicalDust = () => {
@@ -300,7 +302,17 @@ const RashiCard = ({ sign, index, onClick, colors }) => (
 
 const RashiBox = ({ setCurrentPage, setSelectedSign }) => {
   const { colors } = useTheme();
+  const { isLoggedIn } = useAuth();
   const [modalSign, setModalSign] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+
+  const handleSignClick = (signId) => {
+    if (isLoggedIn) {
+      setModalSign(signId);
+    } else {
+      setShowLogin(true);
+    }
+  };
 
   return (
     <section id="rashi-section" className="section" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -327,18 +339,18 @@ const RashiBox = ({ setCurrentPage, setSelectedSign }) => {
         {/* Row 1: Cards 1 to 4 (Aries, Taurus, Gemini, Cancer) */}
         {ZODIAC_SIGNS.slice(0, 4).map((sign, index) => (
           <div key={sign.id} style={{ order: index + 1 }}>
-            <RashiCard sign={sign} index={index} onClick={() => setModalSign(sign.id)} colors={colors} />
+            <RashiCard sign={sign} index={index} onClick={() => handleSignClick(sign.id)} colors={colors} />
           </div>
         ))}
 
         {/* Card 5 (Leo) */}
         <div style={{ order: 5 }}>
-          <RashiCard sign={ZODIAC_SIGNS[4]} index={4} onClick={() => setModalSign(ZODIAC_SIGNS[4].id)} colors={colors} />
+          <RashiCard sign={ZODIAC_SIGNS[4]} index={4} onClick={() => handleSignClick(ZODIAC_SIGNS[4].id)} colors={colors} />
         </div>
 
         {/* Card 6 (Virgo) — Order 6 */}
         <div style={{ order: 6 }}>
-          <RashiCard sign={ZODIAC_SIGNS[5]} index={5} onClick={() => setModalSign(ZODIAC_SIGNS[5].id)} colors={colors} />
+          <RashiCard sign={ZODIAC_SIGNS[5]} index={5} onClick={() => handleSignClick(ZODIAC_SIGNS[5].id)} colors={colors} />
         </div>
 
         {/* Central Astrology Lottie Animation — Order 7 on Mobile */}
@@ -391,18 +403,18 @@ const RashiBox = ({ setCurrentPage, setSelectedSign }) => {
 
         {/* Card 7 (Libra) — Order 8 */}
         <div style={{ order: 8 }}>
-          <RashiCard sign={ZODIAC_SIGNS[6]} index={6} onClick={() => setModalSign(ZODIAC_SIGNS[6].id)} colors={colors} />
+          <RashiCard sign={ZODIAC_SIGNS[6]} index={6} onClick={() => handleSignClick(ZODIAC_SIGNS[6].id)} colors={colors} />
         </div>
 
         {/* Card 8 (Scorpio) — Order 9 */}
         <div style={{ order: 9 }}>
-          <RashiCard sign={ZODIAC_SIGNS[7]} index={7} onClick={() => setModalSign(ZODIAC_SIGNS[7].id)} colors={colors} />
+          <RashiCard sign={ZODIAC_SIGNS[7]} index={7} onClick={() => handleSignClick(ZODIAC_SIGNS[7].id)} colors={colors} />
         </div>
 
         {/* Row 4: Cards 9 to 12 (Sagittarius, Capricorn, Aquarius, Pisces) — Orders 10 to 13 */}
         {ZODIAC_SIGNS.slice(8, 12).map((sign, index) => (
           <div key={sign.id} style={{ order: index + 10 }}>
-            <RashiCard sign={sign} index={index + 8} onClick={() => setModalSign(sign.id)} colors={colors} />
+            <RashiCard sign={sign} index={index + 8} onClick={() => handleSignClick(sign.id)} colors={colors} />
           </div>
         ))}
       </div>
@@ -413,6 +425,14 @@ const RashiBox = ({ setCurrentPage, setSelectedSign }) => {
         <HoroscopeModal
           initialSign={modalSign}
           onClose={() => setModalSign(null)}
+        />
+      )}
+
+      {/* Login Modal */}
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          message="Sign in to view your personalized daily Rashi horoscope and cosmic insights."
         />
       )}
     </section>

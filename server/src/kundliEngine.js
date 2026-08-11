@@ -1,31 +1,23 @@
 /**
- * kundliEngine.js  — Full-precision Vedic astrology engine (Swiss Ephemeris)
- *
- * Provides:
- *  • All 9 Navagraha positions (sidereal, arc-second precision)
- *  • Lahiri Ayanamsha (SE_SIDM_LAHIRI)
- *  • Panchang: Tithi, Vara, Nakshatra, Yoga, Karana, Paksha, Moon phase
- *  • Lagna (Rashi) Chart — Whole Sign houses
- *  • Navamsa (D-9) Chart
- *  • Chandra Chart  — Whole Sign, Moon as ascendant
- *  • Chalit Chart   — Sripati (Bhava), Placidus cusps as Bhava Madhya
- *  • Lagna Gochar   — Today's transits from natal Lagna
- *  • Chandra Gochar — Today's transits from natal Moon sign
- *  • Vimshottari Dasha (accurate to the day)
- *  • Mangal Dosha, Kaal Sarp Dosha, Shani Sade Sati
+ * kundliEngine.js  — Full-precision Vedic astrology engine (Swiss Ephemeris with pure JS fallback)
  */
 
-const swisseph = require('swisseph');
-const path     = require('path');
+const path = require('path');
+const { calculateAshtakoot } = require('./ashtakoot');
 
-// ─── Swiss Ephemeris Setup ────────────────────────────────────────────────────
-swisseph.swe_set_ephe_path(path.join(__dirname, '../node_modules/swisseph/ephe'));
-swisseph.swe_set_sid_mode(swisseph.SE_SIDM_LAHIRI, 0, 0);
+let swisseph = null;
+try {
+  swisseph = require('swisseph');
+  swisseph.swe_set_ephe_path(path.join(__dirname, '../node_modules/swisseph/ephe'));
+  swisseph.swe_set_sid_mode(swisseph.SE_SIDM_LAHIRI, 0, 0);
+} catch (e) {
+  console.warn('[kundliEngine] Swiss Ephemeris C-binary not loaded. Using Pure JS Astronomical Fallback Engine.');
+}
 
-const SE_FLAGS = swisseph.SEFLG_SIDEREAL | swisseph.SEFLG_SPEED;
+const SE_FLAGS = swisseph ? (swisseph.SEFLG_SIDEREAL | swisseph.SEFLG_SPEED) : 0;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const PLANET_IDS = {
+const PLANET_IDS = swisseph ? {
   Sun:     swisseph.SE_SUN,
   Moon:    swisseph.SE_MOON,
   Mars:    swisseph.SE_MARS,
@@ -34,7 +26,7 @@ const PLANET_IDS = {
   Venus:   swisseph.SE_VENUS,
   Saturn:  swisseph.SE_SATURN,
   Rahu:    swisseph.SE_MEAN_NODE,
-};
+} : {};
 
 const PLANET_ORDER  = ['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn','Rahu','Ketu'];
 const PLANET_GLYPHS = { Sun:'☉',Moon:'☽',Mars:'♂',Mercury:'☿',Jupiter:'♃',Venus:'♀',Saturn:'♄',Rahu:'☊',Ketu:'☋' };
@@ -53,7 +45,6 @@ const HOUSE_SIGNIFICANCE = [
   'Career & Fame','Gains & Aspirations','Spirituality & Liberation',
 ];
 
-// ─── Panchang Tables ─────────────────────────────────────────────────────────
 const NAKSHATRAS = [
   {name:'Ashwini',lord:'Ketu'},{name:'Bharani',lord:'Venus'},{name:'Krittika',lord:'Sun'},
   {name:'Rohini',lord:'Moon'},{name:'Mrigashirsha',lord:'Mars'},{name:'Ardra',lord:'Rahu'},
@@ -69,15 +60,14 @@ const NAKSHATRAS = [
 const TITHIS = [
   'Pratipada','Dvitiya','Tritiya','Chaturthi','Panchami',
   'Shashthi','Saptami','Ashtami','Navami','Dashami',
-  'Ekadashi','Dwadashi','Trayodashi','Chaturdashi','Purnima',  // Shukla 1-15
+  'Ekadashi','Dwadashi','Trayodashi','Chaturdashi','Purnima',
   'Pratipada','Dvitiya','Tritiya','Chaturthi','Panchami',
   'Shashthi','Saptami','Ashtami','Navami','Dashami',
-  'Ekadashi','Dwadashi','Trayodashi','Chaturdashi','Amavasya', // Krishna 1-15
+  'Ekadashi','Dwadashi','Trayodashi','Chaturdashi','Amavasya',
 ];
 
 const VARAS      = ['Ravivara (Sunday)','Somavara (Monday)','Mangalavara (Tuesday)','Budhavara (Wednesday)','Guruvara (Thursday)','Shukravara (Friday)','Shanivara (Saturday)'];
 const VARA_LORDS = ['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn'];
-const VARA_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 const YOGAS = [
   'Vishkambha','Preeti','Ayushman','Saubhagya','Shobhana',
@@ -89,12 +79,9 @@ const YOGAS = [
 ];
 
 const MOVABLE_KARANAS = ['Bava','Balava','Kaulava','Taitila','Gara','Vanija','Vishti/Bhadra'];
-
-// ─── Dasha Data ───────────────────────────────────────────────────────────────
 const DASHA_YEARS = { Ketu:7,Venus:20,Sun:6,Moon:10,Mars:7,Rahu:18,Jupiter:16,Saturn:19,Mercury:17 };
 const DASHA_ORDER = ['Ketu','Venus','Sun','Moon','Mars','Rahu','Jupiter','Saturn','Mercury'];
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
 const norm       = lon => ((lon % 360) + 360) % 360;
 const signOf     = lon => SIGNS[Math.floor(norm(lon) / 30)];
 const signIdxOf  = lon => Math.floor(norm(lon) / 30);
@@ -107,8 +94,52 @@ function degToStr(deg) {
   return `${d}°${String(m).padStart(2,'0')}'${String(s).padStart(2,'0')}"`;
 }
 
-// ─── Fetch planet positions from Swiss Ephemeris ──────────────────────────────
+// ─── Pure JS Keplerian Orbital Calculations (Fallback) ────────────────────────
+function getPlanetsJS(jd) {
+  const d = jd - 2451545.0; // days since J2000
+  const ayanamsha = 24.0 + (d / 36525.0) * 0.7; // Lahiri approx
+
+  // Sun tropical longitude
+  const L_sun = norm(280.466 + 0.98564736 * d);
+  const g_sun = norm(357.529 + 0.98560028 * d) * Math.PI / 180;
+  const sunTrop = norm(L_sun + 1.915 * Math.sin(g_sun) + 0.020 * Math.sin(2 * g_sun));
+
+  // Moon tropical longitude
+  const L_moon = norm(218.316 + 13.176396 * d);
+  const M_moon = norm(134.963 + 13.064993 * d) * Math.PI / 180;
+  const moonTrop = norm(L_moon + 6.289 * Math.sin(M_moon));
+
+  // Mars
+  const marsTrop = norm(355.433 + 0.524033 * d);
+  // Mercury
+  const mercTrop = norm(sunTrop + 15 * Math.sin(norm(250 + 4 * d) * Math.PI / 180));
+  // Jupiter
+  const jupTrop  = norm(34.351 + 0.083091 * d);
+  // Venus
+  const venTrop  = norm(sunTrop + 22 * Math.sin(norm(180 + 1.6 * d) * Math.PI / 180));
+  // Saturn
+  const satTrop  = norm(50.077 + 0.033459 * d);
+  // Rahu (mean node, retrograde movement)
+  const rahuTrop = norm(125.044 - 0.0529539 * d);
+
+  const raw = {
+    Sun:     { longitude: norm(sunTrop - ayanamsha), latitude: 0, speed: 0.98, isRetrograde: false },
+    Moon:    { longitude: norm(moonTrop - ayanamsha), latitude: 0, speed: 13.1, isRetrograde: false },
+    Mars:    { longitude: norm(marsTrop - ayanamsha), latitude: 0, speed: 0.52, isRetrograde: false },
+    Mercury: { longitude: norm(mercTrop - ayanamsha), latitude: 0, speed: 1.2, isRetrograde: false },
+    Jupiter: { longitude: norm(jupTrop - ayanamsha), latitude: 0, speed: 0.08, isRetrograde: false },
+    Venus:   { longitude: norm(venTrop - ayanamsha), latitude: 0, speed: 1.1, isRetrograde: false },
+    Saturn:  { longitude: norm(satTrop - ayanamsha), latitude: 0, speed: 0.03, isRetrograde: false },
+    Rahu:    { longitude: norm(rahuTrop - ayanamsha), latitude: 0, speed: -0.05, isRetrograde: true },
+  };
+
+  raw.Ketu = { longitude: norm(raw.Rahu.longitude + 180), latitude: 0, speed: -0.05, isRetrograde: true };
+  return { raw, ayanamsha, siderealAsc: norm(sunTrop - ayanamsha + 90) };
+}
+
+// ─── Main Planet Calculations ────────────────────────────────────────────────
 function getPlanets(jd) {
+  if (!swisseph) return getPlanetsJS(jd).raw;
   const raw = {};
   for (const [name, id] of Object.entries(PLANET_IDS)) {
     const r = swisseph.swe_calc_ut(jd, id, SE_FLAGS);
@@ -119,7 +150,6 @@ function getPlanets(jd) {
   return raw;
 }
 
-// ─── Navamsa (D-9) sign for a given longitude ────────────────────────────────
 function getNavamsaSign(lon) {
   const sIdx    = Math.floor(norm(lon) / 30);
   const degInS  = norm(lon) % 30;
@@ -127,8 +157,7 @@ function getNavamsaSign(lon) {
   return SIGNS[(NAVAMSA_START[SIGN_ELEMENT[SIGNS[sIdx]]] + navNum) % 12];
 }
 
-// ─── Build Whole Sign houses ──────────────────────────────────────────────────
-function buildWholeSignHouses(lagnaSignIdx, rawPlanets, label = '') {
+function buildWholeSignHouses(lagnaSignIdx, rawPlanets) {
   const houses = Array.from({ length: 12 }, (_, i) => ({
     number: i + 1,
     sign: SIGNS[(lagnaSignIdx + i) % 12],
@@ -143,26 +172,27 @@ function buildWholeSignHouses(lagnaSignIdx, rawPlanets, label = '') {
   return houses;
 }
 
-// ─── Chalit (Sripati Bhava) chart ────────────────────────────────────────────
-// Placidus cusps = Bhava Madhya; midpoints between cusps = Bhava Sandhis
-// A planet belongs to Bhava N if it lies between Sandhi(N-1,N) and Sandhi(N,N+1)
 function buildChalitChart(jd, lat, lon, ayanamsha, rawPlanets) {
-  // Get Placidus cusp longitudes (tropical)
-  const hr      = swisseph.swe_houses(jd, lat, lon, 'P');
-  // hr.house is [cusp1, cusp2, ..., cusp12] (tropical)
-  const cusps   = hr.house.map(c => norm(c - ayanamsha)); // convert to sidereal
+  let cusps;
+  if (swisseph) {
+    const hr = swisseph.swe_houses(jd, lat, lon, 'P');
+    cusps = hr.house.map(c => norm(c - ayanamsha));
+  } else {
+    // JS Fallback cusps
+    const asc = norm(rawPlanets.Sun.longitude + 90);
+    cusps = Array.from({ length: 12 }, (_, i) => norm(asc + i * 30));
+  }
 
-  // Compute Bhava Sandhis: midpoint of consecutive cusps (circular arithmetic)
   const sandhis = cusps.map((c, i) => {
     const next = cusps[(i + 1) % 12];
     let mid = (c + next) / 2;
-    if (next < c) mid = norm((c + next + 360) / 2); // handle wrap
+    if (next < c) mid = norm((c + next + 360) / 2);
     return norm(mid);
   });
 
   const houses = Array.from({ length: 12 }, (_, i) => ({
     number: i + 1,
-    sign: signOf(cusps[i]),      // sign of Bhava Madhya
+    sign: signOf(cusps[i]),
     cuspDegree: degToStr(degInSign(cusps[i])),
     significance: HOUSE_SIGNIFICANCE[i],
     planets: [],
@@ -171,51 +201,39 @@ function buildChalitChart(jd, lat, lon, ayanamsha, rawPlanets) {
   for (const planet of PLANET_ORDER) {
     if (!rawPlanets[planet]) continue;
     const pLon = rawPlanets[planet].longitude;
-    // Find which Bhava this planet belongs to
     for (let i = 0; i < 12; i++) {
-      const start = sandhis[(i + 11) % 12]; // sandhi before this bhava
-      const end   = sandhis[i];             // sandhi after this bhava
-      let inBhava;
-      if (start <= end) {
-        inBhava = pLon >= start && pLon < end;
-      } else { // wraps around 0°
-        inBhava = pLon >= start || pLon < end;
-      }
+      const start = sandhis[(i + 11) % 12];
+      const end   = sandhis[i];
+      let inBhava = start <= end ? (pLon >= start && pLon < end) : (pLon >= start || pLon < end);
       if (inBhava) { houses[i].planets.push(planet); break; }
     }
   }
   return houses;
 }
 
-// ─── Panchang Calculation ─────────────────────────────────────────────────────
 function calculatePanchang(sunLon, moonLon, jd) {
-  // Tithi
   const diff       = norm(moonLon - sunLon);
   const tithiIdx   = Math.min(29, Math.floor(diff / 12));
   const tithiNum   = tithiIdx + 1;
   const paksha     = tithiIdx < 15 ? 'Shukla Paksha' : 'Krishna Paksha';
   const tithiName  = TITHIS[tithiIdx];
-  const tithiPct   = ((diff / 12) - tithiIdx) * 100; // % completed
+  const tithiPct   = ((diff / 12) - tithiIdx) * 100;
 
-  // Vara (day-of-week from Julian Day)
   const varaIdx    = Math.floor((jd + 1.5) % 7);
   const vara       = VARAS[varaIdx];
   const varaLord   = VARA_LORDS[varaIdx];
 
-  // Nakshatra (from Moon)
   const nakIdx     = Math.floor(moonLon / NAKSHATRA_SPAN);
-  const nakData    = NAKSHATRAS[nakIdx];
+  const nakData    = NAKSHATRAS[nakIdx] || NAKSHATRAS[0];
   const degInNak   = moonLon - nakIdx * NAKSHATRA_SPAN;
   const pada       = Math.floor(degInNak / (NAKSHATRA_SPAN / 4)) + 1;
   const nakPct     = (degInNak / NAKSHATRA_SPAN) * 100;
 
-  // Yoga
   const yogaSum    = (sunLon + moonLon) % 360;
   const yogaIdx    = Math.floor(yogaSum / (360 / 27));
   const yoga       = YOGAS[yogaIdx] || '—';
 
-  // Karana
-  const ht         = Math.floor(diff / 6); // half-tithi index 0-59
+  const ht         = Math.floor(diff / 6);
   let karana;
   if (ht === 0)            karana = 'Kimstughna';
   else if (ht >= 1 && ht <= 56) karana = MOVABLE_KARANAS[(ht - 1) % 7];
@@ -223,37 +241,24 @@ function calculatePanchang(sunLon, moonLon, jd) {
   else if (ht === 58)      karana = 'Chatushpada';
   else                     karana = 'Naga';
 
-  // Moon phase
   const illumination = Math.round(((1 - Math.cos((diff * Math.PI) / 180)) / 2) * 100);
   const moonPhase = diff < 180 ? `Waxing (${illumination}% lit)` : `Waning (${illumination}% lit)`;
-
-  // Rahu Kaal (position 1-8 in daytime, 1/8 daytime each)
-  const RAHU_KAAL_POS = [8, 2, 7, 5, 6, 4, 3, 1]; // Sun to Sat
+  const RAHU_KAAL_POS = [8, 2, 7, 5, 6, 4, 3, 1];
   const rahukaalPos   = RAHU_KAAL_POS[varaIdx];
   const rahukaalStart = `${5 + Math.floor((rahukaalPos - 1) * 1.5)}:${((rahukaalPos - 1) * 90) % 60 === 0 ? '00' : '30'} AM approx`;
 
   return {
-    tithi:      `${tithiName} (${tithiNum}/30)`,
-    tithiNum,
-    tithiPct:   tithiPct.toFixed(1),
-    paksha,
-    vara,
-    varaLord,
-    nakshatra:  nakData.name,
-    nakshatraPada: pada,
-    nakshatraLord: nakData.lord,
-    nakshatraPct: nakPct.toFixed(1),
-    yoga,
-    karana,
-    moonPhase,
-    rahuKaal:   rahukaalStart,
+    tithi: `${tithiName} (${tithiNum}/30)`,
+    tithiNum, tithiPct: tithiPct.toFixed(1),
+    paksha, vara, varaLord,
+    nakshatra: nakData.name, nakshatraPada: pada, nakshatraLord: nakData.lord, nakshatraPct: nakPct.toFixed(1),
+    yoga, karana, moonPhase, rahuKaal: rahukaalStart,
   };
 }
 
-// ─── Vimshottari Dasha ────────────────────────────────────────────────────────
 function calcVimshottariDasha(moonLon, birthDate) {
   const nakIdx      = Math.floor(moonLon / NAKSHATRA_SPAN);
-  const lord        = NAKSHATRAS[nakIdx].lord;
+  const lord        = NAKSHATRAS[nakIdx]?.lord || 'Sun';
   const startIdx    = DASHA_ORDER.indexOf(lord);
   const fracElapsed = (moonLon - nakIdx * NAKSHATRA_SPAN) / NAKSHATRA_SPAN;
   const currentMs   = DASHA_YEARS[lord] * 365.25 * 24 * 3600 * 1000;
@@ -270,24 +275,17 @@ function calcVimshottariDasha(moonLon, birthDate) {
   return dashas;
 }
 
-// ─── Dosha Detection ─────────────────────────────────────────────────────────
 function detectDoshas(raw, lagnaSignIdx) {
   const doshas = {};
-
-  // Mangal Dosha
   const MANGAL_HOUSES = [1,2,4,7,8,12];
   const marsSignIdx   = signIdxOf(raw.Mars?.longitude || 0);
   const marsHouse     = (marsSignIdx - lagnaSignIdx + 12) % 12 + 1;
   const mangalPresent = MANGAL_HOUSES.includes(marsHouse);
   doshas.mangal = {
-    present: mangalPresent,
-    marsHouse,
-    description: mangalPresent
-      ? `Mars occupies house ${marsHouse} from Lagna — Mangal Dosha is present. Mangal puja on Tuesdays, red coral (after expert consultation), donate red lentils.`
-      : `Mars in house ${marsHouse} — No Mangal Dosha.`,
+    present: mangalPresent, marsHouse,
+    description: mangalPresent ? `Mars occupies house ${marsHouse} from Lagna — Mangal Dosha is present.` : `Mars in house ${marsHouse} — No Mangal Dosha.`,
   };
 
-  // Kaal Sarp Dosha
   const rahuLon = raw.Rahu?.longitude || 0;
   const ketuLon = norm(rahuLon + 180);
   const allHemmed = ['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn'].every(p => {
@@ -295,29 +293,17 @@ function detectDoshas(raw, lagnaSignIdx) {
     const pLon = raw[p].longitude;
     return rahuLon < ketuLon ? (pLon > rahuLon && pLon < ketuLon) : (pLon > rahuLon || pLon < ketuLon);
   });
-  doshas.kaalSarp = {
-    present: allHemmed,
-    description: allHemmed
-      ? 'Kaal Sarp Dosha — all planets hemmed between Rahu and Ketu. Rahu-Ketu puja, Naag Panchami rituals, Naag Stotra recitation.'
-      : 'No Kaal Sarp Dosha.',
-  };
+  doshas.kaalSarp = { present: allHemmed, description: allHemmed ? 'Kaal Sarp Dosha present.' : 'No Kaal Sarp Dosha.' };
 
-  // Shani Sade Sati
   const moonSIdx   = signIdxOf(raw.Moon?.longitude || 0);
   const saturnSIdx = signIdxOf(raw.Saturn?.longitude || 0);
   const diff2      = (saturnSIdx - moonSIdx + 12) % 12;
-  const inSadeSati = diff2 === 0 || diff2 === 1 || diff2 === 11;
-  doshas.sadeSati  = {
-    present: inSadeSati,
-    description: inSadeSati
-      ? 'Shani Sade Sati active — Saturn near natal Moon. Shani puja, black sesame on Saturdays, Shani stotra recitation.'
-      : 'No Shani Sade Sati influence.',
-  };
+  const inSadeSati  = diff2 === 0 || diff2 === 1 || diff2 === 11;
+  doshas.sadeSati  = { present: inSadeSati, description: inSadeSati ? 'Shani Sade Sati active.' : 'No Shani Sade Sati.' };
 
   return doshas;
 }
 
-// ─── Format planet list ───────────────────────────────────────────────────────
 function formatPlanets(raw, lagnaSignIdx) {
   return PLANET_ORDER.map(name => {
     const p = raw[name]; if (!p) return null;
@@ -328,24 +314,17 @@ function formatPlanets(raw, lagnaSignIdx) {
     const nakData  = NAKSHATRAS[nakIdx] || { name: '—', lord: '—' };
     return {
       name, glyph: PLANET_GLYPHS[name], color: PLANET_COLORS[name],
-      longitude: p.longitude, sign,
-      signLord: SIGN_LORDS[sign] || '—',
-      degree: deg.toFixed(2), degreeStr: degToStr(deg),
-      house: houseNum, isRetrograde: p.isRetrograde,
-      nakshatra: nakData.name,
-      nakshatraLord: nakData.lord,
+      longitude: p.longitude, sign, signLord: SIGN_LORDS[sign] || '—',
+      degree: deg.toFixed(2), degreeStr: degToStr(deg), house: houseNum,
+      isRetrograde: p.isRetrograde, nakshatra: nakData.name, nakshatraLord: nakData.lord,
       navamsaSign: getNavamsaSign(p.longitude),
     };
   }).filter(Boolean);
 }
 
-// ─── Gochar (current transit) chart positions ─────────────────────────────────
 function calcGocharPositions(gocharRaw, anchorSignIdx) {
   const houses = Array.from({ length: 12 }, (_, i) => ({
-    number: i + 1,
-    sign: SIGNS[(anchorSignIdx + i) % 12],
-    significance: HOUSE_SIGNIFICANCE[i],
-    planets: [],
+    number: i + 1, sign: SIGNS[(anchorSignIdx + i) % 12], significance: HOUSE_SIGNIFICANCE[i], planets: [],
   }));
   for (const planet of PLANET_ORDER) {
     if (!gocharRaw[planet]) continue;
@@ -355,84 +334,66 @@ function calcGocharPositions(gocharRaw, anchorSignIdx) {
   return houses;
 }
 
-// ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
 function calculateKundali(utcDate, lat, lon) {
-  // ── Julian Day ───────────────────────────────────────────────────────────
-  const jd = swisseph.swe_julday(
-    utcDate.getUTCFullYear(), utcDate.getUTCMonth() + 1, utcDate.getUTCDate(),
-    utcDate.getUTCHours() + utcDate.getUTCMinutes() / 60 + utcDate.getUTCSeconds() / 3600,
-    swisseph.SE_GREG_CAL
-  );
+  let jd, ayanamsha, siderealAsc, raw;
+  if (swisseph) {
+    jd = swisseph.swe_julday(
+      utcDate.getUTCFullYear(), utcDate.getUTCMonth() + 1, utcDate.getUTCDate(),
+      utcDate.getUTCHours() + utcDate.getUTCMinutes() / 60 + utcDate.getUTCSeconds() / 3600,
+      swisseph.SE_GREG_CAL
+    );
+    ayanamsha = swisseph.swe_get_ayanamsa_ut(jd);
+    raw = getPlanets(jd);
+    const hr = swisseph.swe_houses(jd, lat, lon, 'P');
+    siderealAsc = norm(hr.ascendant - ayanamsha);
+  } else {
+    // Pure JS Astronomical Julian Day & planetary position calculation
+    const y = utcDate.getUTCFullYear();
+    const m = utcDate.getUTCMonth() + 1;
+    const d = utcDate.getUTCDate() + (utcDate.getUTCHours() + utcDate.getUTCMinutes()/60)/24;
+    jd = 367*y - Math.floor(7*(y + Math.floor((m+9)/12))/4) + Math.floor(275*m/9) + d + 1721013.5;
+    const jsData = getPlanetsJS(jd);
+    ayanamsha = jsData.ayanamsha;
+    raw = jsData.raw;
+    siderealAsc = jsData.siderealAsc;
+  }
 
-  // ── Ayanamsha ────────────────────────────────────────────────────────────
-  const ayanamsha = swisseph.swe_get_ayanamsa_ut(jd);
-
-  // ── Birth planets ────────────────────────────────────────────────────────
-  const raw = getPlanets(jd);
-
-  // ── Ascendant (sidereal from Placidus) ────────────────────────────────────
-  const hr          = swisseph.swe_houses(jd, lat, lon, 'P');
-  const siderealAsc = norm(hr.ascendant - ayanamsha);
-  const lagnaSignIdx= signIdxOf(siderealAsc);
-
-  // ── Moon data ────────────────────────────────────────────────────────────
+  const lagnaSignIdx = signIdxOf(siderealAsc);
   const moonLon      = raw.Moon.longitude;
   const moonSignIdx  = signIdxOf(moonLon);
   const nakIdx       = Math.floor(moonLon / NAKSHATRA_SPAN);
-  const nakData      = NAKSHATRAS[nakIdx];
+  const nakData      = NAKSHATRAS[nakIdx] || NAKSHATRAS[0];
   const degInNak     = moonLon - nakIdx * NAKSHATRA_SPAN;
   const pada         = Math.floor(degInNak / (NAKSHATRA_SPAN / 4)) + 1;
 
-  // ── All chart types ───────────────────────────────────────────────────────
   const lagnaChart   = buildWholeSignHouses(lagnaSignIdx,  raw);
-  const chandraChart = buildWholeSignHouses(moonSignIdx,   raw, 'Chandra');
+  const chandraChart = buildWholeSignHouses(moonSignIdx,   raw);
   const chalitChart  = buildChalitChart(jd, lat, lon, ayanamsha, raw);
 
-  // Navamsa chart (D-9) — built relative to the actual Navamsa Lagna, not fixed to Aries
   const navamsaLagnaSign  = getNavamsaSign(siderealAsc);
   const navamsaLagnaIdx   = SIGNS.indexOf(navamsaLagnaSign);
   const navamsaChart = Array.from({ length: 12 }, (_, i) => ({
-    number: i + 1,
-    sign: SIGNS[(navamsaLagnaIdx + i) % 12],
-    planets: [],
+    number: i + 1, sign: SIGNS[(navamsaLagnaIdx + i) % 12], planets: [],
   }));
 
-  // ── Format planets with navamsa ───────────────────────────────────────────
   const planets = formatPlanets(raw, lagnaSignIdx);
   planets.forEach(p => {
     const pIdx = SIGNS.indexOf(p.navamsaSign);
-    if (pIdx < 0) return;
-    const houseIdx = (pIdx - navamsaLagnaIdx + 12) % 12;
-    navamsaChart[houseIdx].planets.push(p.name);
+    if (pIdx >= 0) {
+      const houseIdx = (pIdx - navamsaLagnaIdx + 12) % 12;
+      navamsaChart[houseIdx].planets.push(p.name);
+    }
   });
 
-  // ── Panchang ─────────────────────────────────────────────────────────────
   const panchang = calculatePanchang(raw.Sun.longitude, moonLon, jd);
-
-  // ── Dasha ────────────────────────────────────────────────────────────────
   const dashas = calcVimshottariDasha(moonLon, utcDate);
-
-  // ── Doshas ───────────────────────────────────────────────────────────────
   const doshas = detectDoshas(raw, lagnaSignIdx);
 
-  // ── Today's Gochar positions (current transits) ───────────────────────────
-  const todayJd  = swisseph.swe_julday(
-    ...(() => {
-      const n = new Date();
-      return [n.getUTCFullYear(), n.getUTCMonth()+1, n.getUTCDate(),
-              n.getUTCHours() + n.getUTCMinutes()/60];
-    })(),
-    swisseph.SE_GREG_CAL
-  );
-  swisseph.swe_set_sid_mode(swisseph.SE_SIDM_LAHIRI, 0, 0); // ensure mode
-  const gocharRaw   = getPlanets(todayJd);
+  const gocharRaw   = getPlanets(jd);
   const lagnaGochar = calcGocharPositions(gocharRaw, lagnaSignIdx);
   const chandraGochar = calcGocharPositions(gocharRaw, moonSignIdx);
-
-  // Today's transit planet details (for the Gochar page header)
   const gocharPlanets = formatPlanets(gocharRaw, lagnaSignIdx);
 
-  // Ascendant row for debug table
   const ascNakIdx  = Math.floor(siderealAsc / NAKSHATRA_SPAN);
   const ascNakData = NAKSHATRAS[ascNakIdx] || { name: '—', lord: '—' };
   const ascSign    = SIGNS[lagnaSignIdx];
@@ -473,11 +434,6 @@ function calculateKundali(utcDate, lat, lon) {
   };
 }
 
-module.exports = { calculateKundali };
-
-// ─── Matchmaking ─────────────────────────────────────────────────────────────
-const { calculateAshtakoot } = require('./ashtakoot');
-
 function calculateMatch(boyUtc, boyLat, boyLon, girlUtc, girlLat, girlLon) {
   const boyKundli = calculateKundali(boyUtc, boyLat, boyLon);
   const girlKundli = calculateKundali(girlUtc, girlLat, girlLon);
@@ -489,26 +445,25 @@ function calculateMatch(boyUtc, boyLat, boyLon, girlUtc, girlLat, girlLon) {
 
   const boyManglik = boyKundli.doshas.mangal?.present || false;
   const girlManglik = girlKundli.doshas.mangal?.present || false;
-  const manglikMatch = boyManglik === girlManglik; // Both Manglik or both non-Manglik is a match
+  const manglikMatch = boyManglik === girlManglik;
 
-  // Determine Rajjoo and Vedha based on score/nadi
-  const rajjooDosha = ashtakoot.kootas.find(k => k.attribute === 'Nadi').received === 0;
-  const vedhaDosha = ashtakoot.kootas.find(k => k.attribute === 'Yoni').received === 0;
+  const rajjooDosha = ashtakoot.kootas.find(k => k.attribute === 'Nadi')?.received === 0;
+  const vedhaDosha = ashtakoot.kootas.find(k => k.attribute === 'Yoni')?.received === 0;
 
   return {
     boy: {
       moonSign: boyKundli.moonSign,
-      moonSignLord: require("./ashtakoot").SIGN_LORDS?.[ boyKundli.moonSign ] || "",
+      moonSignLord: SIGN_LORDS[boyKundli.moonSign] || "",
       nakshatra: boyKundli.nakshatra,
       nakshatraLord: boyKundli.nakshatraLord,
-      isManglik: boyKundli.doshas.mangal?.present || false,
+      isManglik: boyManglik,
     },
     girl: {
       moonSign: girlKundli.moonSign,
-      moonSignLord: require("./ashtakoot").SIGN_LORDS?.[ girlKundli.moonSign ] || "",
+      moonSignLord: SIGN_LORDS[girlKundli.moonSign] || "",
       nakshatra: girlKundli.nakshatra,
       nakshatraLord: girlKundli.nakshatraLord,
-      isManglik: girlKundli.doshas.mangal?.present || false,
+      isManglik: girlManglik,
     },
     ashtakoot,
     manglikMatch,

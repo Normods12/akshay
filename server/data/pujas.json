@@ -1,0 +1,195 @@
+[
+  {
+    "id": "5360deb1-1820-436a-8ceb-efef31d5c054",
+    "title": "Test Puja",
+    "price": "23000",
+    "category": "",
+    "description": "XYZ",
+    "benefits": [
+      "A\r",
+      "B"
+    ],
+    "image": "/uploads/95805864-3a01-4607-92f7-d3b2d2315ac2.png",
+    "createdAt": "2026-08-08T17:22:01.873Z"
+  },
+  {
+    "id": "puja-1",
+    "title": "Navagraha Shanti Puja",
+    "price": "₹31,000",
+    "image": "/images/puja_navagraha.png",
+    "category": "Planetary Remedies",
+    "description": "Balance the cosmic energies of all 9 planets (Navagrahas) through sacred rituals and mantras. This comprehensive puja addresses planetary doshas and brings peace, prosperity and harmony into all aspects of life.",
+    "benefits": [
+      "Neutralizes planetary afflictions",
+      "Brings peace and prosperity",
+      "Improves health and relationships",
+      "Complete 9-planet worship"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-2",
+    "title": "Navagraha Homa (Fire Ritual)",
+    "price": "₹11,000",
+    "image": "/images/puja_homa.png",
+    "category": "Homa Rituals",
+    "description": "Sacred fire ritual (Havan/Homa) performed specifically for all nine planetary deities. The sacred fire carries your prayers directly to the divine, purifying karma and inviting planetary blessings.",
+    "benefits": [
+      "Purifies negative karma",
+      "Direct divine connection",
+      "Powerful planetary appeasement",
+      "Fire as sacred messenger"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-3",
+    "title": "Individual Graha Shanti Puja",
+    "price": "₹11,000/planet",
+    "image": "/images/puja_navagraha.png",
+    "category": "Individual Planet",
+    "description": "Targeted puja for a specific planet causing affliction in your horoscope. Available for Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, and Ketu.",
+    "benefits": [
+      "Targeted planetary remedy",
+      "Customized for your chart",
+      "All 9 planets available",
+      "Expert Pandit guidance"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-4",
+    "title": "Maha Mrityunjaya Japa & Homa",
+    "price": "₹1,00,000",
+    "image": "/images/puja_homa.png",
+    "category": "Supreme Rituals",
+    "description": "The most powerful Vedic ritual for health, longevity, and overcoming life-threatening situations. 125,000 Maha Mrityunjaya mantra chanting combined with a sacred fire ritual.",
+    "benefits": [
+      "Conquers serious illness",
+      "Life extension & vitality",
+      "Removes fear of death",
+      "Powerful Shiva blessing"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-5",
+    "title": "Rudrabhishek",
+    "price": "₹11,000 – ₹21,000",
+    "image": "/images/puja_rudra.png",
+    "category": "Shiva Rituals",
+    "description": "Sacred bathing of the Shiva Lingam with milk, honey, curd, ghee, and sacred waters while chanting Rudra mantras.",
+    "benefits": [
+      "Lord Shiva blessings",
+      "Removes obstacles",
+      "Spiritual growth",
+      "Three levels available"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-6",
+    "title": "Mangal Dosha (Kuja Dosha) Shanti",
+    "price": "₹21,000",
+    "image": "/images/puja_navagraha.png",
+    "category": "Dosha Remedies",
+    "description": "Specialized remedial puja to neutralize the effects of Mangal Dosha in your horoscope.",
+    "benefits": [
+      "Neutralizes Mangal Dosha",
+      "Improves marriage prospects",
+      "Harmonizes relationships",
+      "Mars energy balancing"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-7",
+    "title": "Kaal Sarp Dosha Shanti",
+    "price": "₹21,000",
+    "image": "/images/puja_homa.png",
+    "category": "Dosha Remedies",
+    "description": "Powerful ritual to mitigate the effects of Kaal Sarp Dosha formed when all planets are hemmed between Rahu and Ketu.",
+    "benefits": [
+      "Removes Kaal Sarp effects",
+      "Career growth",
+      "Prosperity enhancement",
+      "Rahu-Ketu balance"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-8",
+    "title": "Shani Shanti Puja",
+    "price": "₹15,000",
+    "image": "/images/puja_navagraha.png",
+    "category": "Planetary Remedies",
+    "description": "Sacred ritual to propitiate Saturn (Shani Dev) during Shani Sade Sati, Shani Dasha, or other Saturn afflictions.",
+    "benefits": [
+      "Saturn (Shani) appeasement",
+      "Sade Sati relief",
+      "Career protection",
+      "Discipline and justice"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-9",
+    "title": "Pitru Dosha Shanti",
+    "price": "₹21,000",
+    "image": "/images/puja_homa.png",
+    "category": "Ancestral Rituals",
+    "description": "Sacred ritual to honor ancestors and resolve ancestral debts (Pitru Rin).",
+    "benefits": [
+      "Ancestral soul peace",
+      "Family harmony",
+      "Removes family obstacles",
+      "Karmic debt resolution"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-10",
+    "title": "Durga Saptashati Path",
+    "price": "₹51,000",
+    "image": "/images/puja_durga.png",
+    "category": "Goddess Rituals",
+    "description": "Complete recitation of all 700 verses of Durga Saptashati (Chandi Path) by expert Pandits.",
+    "benefits": [
+      "Divine Shakti protection",
+      "Victory over enemies",
+      "Spiritual awakening",
+      "Complete 700-verse path"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-11",
+    "title": "Lakshmi Kubera Puja & Dhanvantari Homa",
+    "price": "₹41,000",
+    "image": "/images/puja_navagraha.png",
+    "category": "Prosperity Rituals",
+    "description": "Combined powerful ritual invoking Goddess Lakshmi and Lord Kubera for wealth, and Dhanvantari for health.",
+    "benefits": [
+      "Wealth and prosperity",
+      "Business growth",
+      "Health blessings",
+      "Divine abundance"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "puja-12",
+    "title": "Vastu Shanti Puja",
+    "price": "₹55,000",
+    "image": "/images/puja_navagraha.png",
+    "category": "Vastu & Home",
+    "description": "Comprehensive Vastu Shanti ritual to purify and energize your home or office, neutralizing Vastu doshas and balancing the five elements.",
+    "benefits": [
+      "Home energy purification",
+      "Vastu dosha removal",
+      "Family harmony",
+      "Prosperity activation"
+    ],
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  }
+]

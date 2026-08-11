@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import UserAvatar from '../auth/UserAvatar';
+import LoginModal from '../auth/LoginModal';
 
 const DropdownMenu = ({ title, items, current, setCurrentPage }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,7 +81,9 @@ const DropdownMenu = ({ title, items, current, setCurrentPage }) => {
 
 const Navbar = ({ currentPage, setCurrentPage }) => {
   const theme = useTheme();
+  const { isLoggedIn, isAdmin } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   const handleHomeScroll = (id) => {
     if (currentPage !== 'home') {
@@ -198,17 +203,44 @@ const Navbar = ({ currentPage, setCurrentPage }) => {
         <motion.li whileHover={{ y: -2 }}>
           <a href="#" onClick={(e) => { e.preventDefault(); handleHomeScroll('booking-form'); }} style={{ color: 'inherit', transition: 'color 0.3s ease', textDecoration: 'none' }}>Consultation</a>
         </motion.li>
+        {isAdmin && (
+          <motion.li whileHover={{ y: -2 }}>
+            <a href="#" onClick={(e) => { e.preventDefault(); setCurrentPage('admin'); }} style={{ color: currentPage === 'admin' ? theme.colors.primary : '#d4af37', transition: 'color 0.3s ease', textDecoration: 'none', fontWeight: 800 }}>⚙ Admin</a>
+          </motion.li>
+        )}
       </ul>
 
-      {/* Mobile Hamburger */}
-      <button 
-        className="navbar-mobile-toggle"
-        onClick={() => setMobileOpen(!mobileOpen)}
-        style={{
-          background: 'none', border: 'none', color: theme.colors.primary,
-          cursor: 'pointer', display: 'none', padding: '4px'
-        }}
-      >
+      {/* Auth: UserAvatar or Login Button */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {isLoggedIn ? (
+          <UserAvatar setCurrentPage={setCurrentPage} />
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowLogin(true)}
+            style={{
+              padding: '8px 20px', borderRadius: '20px',
+              background: 'linear-gradient(135deg, #d4af37, #b8860b)',
+              border: 'none', color: '#000',
+              fontFamily: 'var(--font-heading)', fontWeight: 700,
+              fontSize: '0.85rem', cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(212,175,55,0.25)',
+            }}
+          >
+            Sign In
+          </motion.button>
+        )}
+
+        {/* Mobile Hamburger */}
+        <button 
+          className="navbar-mobile-toggle"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          style={{
+            background: 'none', border: 'none', color: theme.colors.primary,
+            cursor: 'pointer', display: 'none', padding: '4px'
+          }}
+        >
         {mobileOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
@@ -280,6 +312,12 @@ const Navbar = ({ currentPage, setCurrentPage }) => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
+
+      {/* Login Modal */}
+      {showLogin && (
+        <LoginModal onClose={() => setShowLogin(false)} />
+      )}
     </motion.nav>
   );
 };

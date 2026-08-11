@@ -1,0 +1,42 @@
+[
+  {
+    "id": "6d1a3217-06e1-43da-9697-734faa8edd6a",
+    "title": "Test_Item",
+    "price": "5000",
+    "category": "Gems",
+    "image": "/uploads/d0e6a97d-cc2b-45bb-aa52-d16c4d247650.png",
+    "createdAt": "2026-08-09T06:57:35.983Z"
+  },
+  {
+    "id": "shop-1",
+    "title": "Gemstones",
+    "price": "Starting from ₹1,999",
+    "category": "gemstones",
+    "image": "/images/shop_gemstones.png",
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "shop-2",
+    "title": "Rudraksha",
+    "price": "Starting from ₹999",
+    "category": "rudraksha",
+    "image": "/images/shop_rudraksha.png",
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "shop-3",
+    "title": "Bracelets",
+    "price": "Starting from ₹599",
+    "category": "bracelets",
+    "image": "/images/shop_bracelets.png",
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "shop-4",
+    "title": "Crystal & Trees",
+    "price": "Starting from ₹599",
+    "category": "crystals",
+    "image": "/images/shop_crystals.png",
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  }
+]

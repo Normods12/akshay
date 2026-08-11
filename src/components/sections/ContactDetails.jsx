@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import SectionHeading from '../ui/SectionHeading';
@@ -50,6 +50,44 @@ const YoutubeIcon = ({ size = 24, color = 'currentColor' }) => (
 const ContactDetails = () => {
   const { colors, themeMode } = useTheme();
   const isDark = themeMode === 'dark';
+
+  const formRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ type: '', message: '' });
+
+  const handleSendEmail = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus({ type: '', message: '' });
+
+    if (!formRef.current) return;
+    const formData = new FormData(formRef.current);
+    const user_name = formData.get('user_name');
+    const user_email = formData.get('user_email');
+    const message = formData.get('message');
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_name, user_email, message }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setLoading(false);
+        setStatus({ type: 'success', message: '✨ Thank you! Your message has been sent successfully.' });
+        if (formRef.current) formRef.current.reset();
+      } else {
+        setLoading(false);
+        setStatus({ type: 'error', message: `❌ ${data.error || 'Unable to send message.'}` });
+      }
+    } catch (error) {
+      setLoading(false);
+      setStatus({ type: 'error', message: '❌ Unable to send message. Please try again.' });
+      console.error('Resend Contact Error:', error);
+    }
+  };
 
   return (
     <section id="contact" className="section section--alt" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -155,13 +193,18 @@ const ContactDetails = () => {
           <h3 style={{ fontFamily: 'var(--font-heading)', color: colors.primary, fontSize: '1.5rem', marginBottom: '24px' }}>
             Send a Message
           </h3>
-          <form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} onSubmit={(e) => e.preventDefault()}>
-            <input type="text" placeholder="Your Name" required style={{ padding: '14px', borderRadius: '12px', border: `1px solid ${colors.outline}55`, backgroundColor: 'transparent', color: colors.text, outline: 'none' }} />
-            <input type="email" placeholder="Your Email" required style={{ padding: '14px', borderRadius: '12px', border: `1px solid ${colors.outline}55`, backgroundColor: 'transparent', color: colors.text, outline: 'none' }} />
-            <textarea placeholder="How can we help you?" required rows={4} style={{ padding: '14px', borderRadius: '12px', border: `1px solid ${colors.outline}55`, backgroundColor: 'transparent', color: colors.text, outline: 'none', resize: 'none' }}></textarea>
-            <button type="submit" style={{ padding: '14px', borderRadius: '12px', border: 'none', backgroundColor: colors.primary, color: '#fff', fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-heading)' }}>
-              Send Message
+          <form ref={formRef} onSubmit={handleSendEmail} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <input type="text" name="user_name" placeholder="Your Name" required style={{ padding: '14px', borderRadius: '12px', border: `1px solid ${colors.outline}55`, backgroundColor: 'transparent', color: colors.text, outline: 'none' }} />
+            <input type="email" name="user_email" placeholder="Your Email" required style={{ padding: '14px', borderRadius: '12px', border: `1px solid ${colors.outline}55`, backgroundColor: 'transparent', color: colors.text, outline: 'none' }} />
+            <textarea name="message" placeholder="How can we help you?" required rows={4} style={{ padding: '14px', borderRadius: '12px', border: `1px solid ${colors.outline}55`, backgroundColor: 'transparent', color: colors.text, outline: 'none', resize: 'none' }}></textarea>
+            <button type="submit" disabled={loading} style={{ padding: '14px', borderRadius: '12px', border: 'none', backgroundColor: colors.primary, color: '#fff', fontSize: '1.1rem', fontWeight: 600, cursor: loading ? 'wait' : 'pointer', fontFamily: 'var(--font-heading)', opacity: loading ? 0.7 : 1 }}>
+              {loading ? 'Sending Message...' : 'Send Message'}
             </button>
+            {status.message && (
+              <p style={{ marginTop: '8px', fontSize: '0.95rem', fontWeight: 500, color: status.type === 'success' ? '#10B981' : '#EF4444', textAlign: 'center' }}>
+                {status.message}
+              </p>
+            )}
           </form>
         </motion.div>
       </div>

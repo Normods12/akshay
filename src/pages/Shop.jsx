@@ -1,41 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import AnimatedElements from '../components/ui/AnimatedElements';
 
-const shopCategories = [
+const INITIAL_SHOP_ITEMS = [
   {
-    id: 'gemstones',
+    id: 'shop-1',
     title: 'Gemstones',
     price: 'Starting from ₹1,999',
-    image: '/images/shop_gemstones.png',
-    delay: 0.1
+    category: 'gemstones',
+    image: '/images/shop_gemstones.png'
   },
   {
-    id: 'rudraksha',
+    id: 'shop-2',
     title: 'Rudraksha',
     price: 'Starting from ₹999',
-    image: '/images/shop_rudraksha.png',
-    delay: 0.2
+    category: 'rudraksha',
+    image: '/images/shop_rudraksha.png'
   },
   {
-    id: 'bracelets',
+    id: 'shop-3',
     title: 'Bracelets',
     price: 'Starting from ₹599',
-    image: '/images/shop_bracelets.png',
-    delay: 0.3
+    category: 'bracelets',
+    image: '/images/shop_bracelets.png'
   },
   {
-    id: 'crystals',
+    id: 'shop-4',
     title: 'Crystal & Trees',
     price: 'Starting from ₹599',
-    image: '/images/shop_crystals.png',
-    delay: 0.4
+    category: 'crystals',
+    image: '/images/shop_crystals.png'
   }
 ];
 
-const Shop = () => {
+const Shop = ({ onBookService }) => {
   const theme = useTheme();
+  const [items, setItems] = useState(INITIAL_SHOP_ITEMS);
+
+  useEffect(() => {
+    fetch('/api/shop')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+          setItems(data.data);
+        }
+      })
+      .catch(() => {
+        fetch('http://localhost:3001/api/shop')
+          .then(r => r.json())
+          .then(d => { if (d.data && d.data.length > 0) setItems(d.data); })
+          .catch(e => console.warn('Shop fetch warning:', e));
+      });
+  }, []);
+
+  const handleShopClick = (item) => {
+    const phoneNumber = "919243818146";
+    const msg = `Namaste Ashay ji, I am interested in purchasing "${item.title}" (${item.price || ''}). Please share details and ordering instructions.`;
+    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
 
   return (
     <motion.div 
@@ -93,65 +116,82 @@ const Shop = () => {
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '30px'
         }}>
-          {shopCategories.map((category) => (
-            <motion.div
-              key={category.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: category.delay }}
-              whileHover={{ y: -10 }}
-              style={{
-                borderRadius: '16px',
-                overflow: 'hidden',
-                backgroundColor: 'var(--color-surface-variant)',
-                border: `1px solid ${theme.colors.outline}33`,
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            >
-              <div style={{ height: '240px', overflow: 'hidden' }}>
-                <img 
-                  src={category.image} 
-                  alt={category.title} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-              </div>
-              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', color: theme.colors.text, marginBottom: '8px' }}>
-                  {category.title}
-                </h3>
-                <p style={{ fontFamily: 'var(--font-body)', color: theme.colors.text, opacity: 0.8, marginBottom: '24px', flexGrow: 1 }}>
-                  {category.price}
-                </p>
-                <button
-                  style={{
-                    padding: '12px',
-                    width: '100%',
-                    borderRadius: '8px',
-                    border: `1px solid ${theme.colors.primary}`,
-                    backgroundColor: 'transparent',
-                    color: theme.colors.primary,
-                    fontFamily: 'var(--font-heading)',
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = theme.colors.primary;
-                    e.target.style.color = '#fff';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.color = theme.colors.primary;
-                  }}
-                >
-                  Shop now
-                </button>
-              </div>
-            </motion.div>
-          ))}
+          {items.map((item, idx) => {
+            const imgSrc = item.image ? (item.image.startsWith('/uploads') ? `http://localhost:3001${item.image}` : item.image) : '/images/shop_gemstones.png';
+            const displayPrice = item.price ? (item.price.toString().startsWith('₹') || item.price.toString().toLowerCase().includes('starting') ? item.price : `₹${item.price}`) : 'Price on Request';
+
+            return (
+              <motion.div
+                key={item.id || idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: (idx % 4) * 0.1 }}
+                whileHover={{ y: -10 }}
+                style={{
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  backgroundColor: 'var(--color-surface-variant)',
+                  border: `1px solid ${theme.colors.outline}33`,
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <div style={{ height: '240px', overflow: 'hidden', position: 'relative' }}>
+                  <img 
+                    src={imgSrc} 
+                    alt={item.title} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      if (item.image && item.image.startsWith('/uploads') && !e.target.dataset.triedRelative) {
+                        e.target.dataset.triedRelative = 'true';
+                        e.target.src = item.image;
+                      }
+                    }}
+                  />
+                  {item.category && (
+                    <span style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.7)', color: theme.colors.primary, fontSize: '0.75rem', fontWeight: 700, padding: '4px 10px', borderRadius: '12px', border: `1px solid ${theme.colors.primary}44`, textTransform: 'uppercase' }}>
+                      {item.category}
+                    </span>
+                  )}
+                </div>
+                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', color: theme.colors.text, marginBottom: '8px' }}>
+                    {item.title}
+                  </h3>
+                  <p style={{ fontFamily: 'var(--font-body)', color: theme.colors.primary, fontWeight: 700, fontSize: '1.1rem', marginBottom: '24px', flexGrow: 1 }}>
+                    {displayPrice}
+                  </p>
+                  <button
+                    onClick={() => handleShopClick(item)}
+                    style={{
+                      padding: '12px',
+                      width: '100%',
+                      borderRadius: '8px',
+                      border: `1px solid ${theme.colors.primary}`,
+                      backgroundColor: 'transparent',
+                      color: theme.colors.primary,
+                      fontFamily: 'var(--font-heading)',
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = theme.colors.primary;
+                      e.target.style.color = '#fff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.color = theme.colors.primary;
+                    }}
+                  >
+                    Shop now ✦
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </motion.div>

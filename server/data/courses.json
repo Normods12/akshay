@@ -1,0 +1,26 @@
+[
+  {
+    "id": "course-1",
+    "title": "Foundation of Jyotish",
+    "description": "Learn the fundamentals of Vedic Astrology, planetary alignments, and the logic behind the 12 houses.",
+    "icon": "sun",
+    "youtubeUrl": "https://www.youtube.com/embed/2GasDsqo8JA?list=PLiUoKTT-PqD2ese2Ww4bJQvZ-7C7CEKnB",
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "course-2",
+    "title": "Advanced Chart Reading",
+    "description": "Master the art of synthesis. Learn how to combine Dashas, transits, and Nakshatras for accurate predictions.",
+    "icon": "telescope",
+    "youtubeUrl": "",
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  },
+  {
+    "id": "course-3",
+    "title": "The Art of Tarot",
+    "description": "A deep dive into our unique Vedic-Tarot fusion. Learn to read cards through the lens of ancient spiritual archetypes.",
+    "icon": "card",
+    "youtubeUrl": "",
+    "createdAt": "2026-08-08T00:00:00.000Z"
+  }
+]

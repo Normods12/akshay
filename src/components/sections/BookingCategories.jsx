@@ -186,15 +186,15 @@ const VastuCompassIcon = ({ isHovered }) => (
 );
 
 const CATEGORIES = [
-  { id: 'kundli', title: 'Kundli Reading', description: 'Deep dive into your birth chart for life predictions.', icon: KundliWheelIcon },
-  { id: 'palm', title: 'Palmistry', description: 'Discover what the lines on your hands reveal.', icon: PalmistryIcon },
-  { id: 'career', title: 'Career Guidance', description: 'Astrological insights into your professional path.', icon: CareerBriefcaseIcon },
-  { id: 'marriage', title: 'Marriage Match', description: 'Compatibility checks for a prosperous union.', icon: MarriageRingsIcon },
-  { id: 'muhurat', title: 'Shubh Muhurat', description: 'Find the most auspicious time for new beginnings.', icon: MuhuratSunClockIcon },
-  { id: 'vastu', title: 'Vastu Consultation', description: 'Harmonize your living or working space.', icon: VastuCompassIcon },
+  { id: 'kundli', title: 'Kundli Reading', price: '₹2,100', description: 'Deep dive into your birth chart for life predictions.', icon: KundliWheelIcon },
+  { id: 'palm', title: 'Palmistry', price: '₹1,500', description: 'Discover what the lines on your hands reveal.', icon: PalmistryIcon },
+  { id: 'career', title: 'Career Guidance', price: '₹2,500', description: 'Astrological insights into your professional path.', icon: CareerBriefcaseIcon },
+  { id: 'marriage', title: 'Marriage Match', price: '₹3,100', description: 'Compatibility checks for a prosperous union.', icon: MarriageRingsIcon },
+  { id: 'muhurat', title: 'Shubh Muhurat', price: '₹1,100', description: 'Find the most auspicious time for new beginnings.', icon: MuhuratSunClockIcon },
+  { id: 'vastu', title: 'Vastu Consultation', price: '₹5,000', description: 'Harmonize your living or working space.', icon: VastuCompassIcon },
 ];
 
-const BookingCategories = ({ setSelectedFeature }) => {
+const BookingCategories = ({ onBookService }) => {
   const { colors } = useTheme();
 
   return (
@@ -250,12 +250,27 @@ const BookingCategories = ({ setSelectedFeature }) => {
               description={category.description}
               icon={category.icon}
               onClick={() => {
-                if (setSelectedFeature) setSelectedFeature(category);
-                document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth' });
+                if (onBookService) {
+                  onBookService(category);
+                }
               }}
               style={{ cursor: 'pointer' }}
               transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.1 }}
-            />
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid rgba(212,175,55,0.2)' }}>
+                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.1rem', color: '#d4af37' }}>
+                  {category.price}
+                </span>
+                <span style={{
+                  padding: '8px 16px', borderRadius: '8px',
+                  background: 'linear-gradient(135deg, #d4af37, #b8860b)',
+                  color: '#000', fontFamily: 'var(--font-heading)',
+                  fontWeight: 700, fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '4px'
+                }}>
+                  Book Session ›
+                </span>
+              </div>
+            </ServiceCard>
           ))}
         </div>
       </div>

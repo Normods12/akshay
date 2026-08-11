@@ -1,6 +1,7 @@
 import React from 'react';
 import './index.css';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/layout/Navbar';
 import Hero from './components/sections/Hero';
 import RashiBox from './components/sections/RashiBox';
@@ -19,8 +20,11 @@ import Matchmaking from './pages/Matchmaking';
 import MoonSignCalculator from './pages/MoonSignCalculator';
 import Shop from './pages/Shop';
 import Puja from './pages/Puja';
-import { FeatureModal } from './components/FeatureModal';
-import { kundliFeatures, services } from './data/features';
+import Gallery from './pages/Gallery';
+import AdminPanel from './pages/AdminPanel';
+import BookingModal from './components/BookingModal';
+import WhatsAppButton from './components/ui/WhatsAppButton';
+import AiChatbot from './components/ui/AiChatbot';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -28,8 +32,16 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedSign, setSelectedSign] = useState('aries');
   const [selectedFeature, setSelectedFeature] = useState(null);
+  const [bookingService, setBookingService] = useState(null);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+  const handleOpenBooking = (service) => {
+    setBookingService(service);
+    setIsBookingOpen(true);
+  };
 
   return (
+    <AuthProvider>
       <div className="app-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)' }}>
         <Navbar 
           currentPage={currentPage} 
@@ -46,14 +58,14 @@ function App() {
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
               >
-                <Hero />
+                <Hero setCurrentPage={setCurrentPage} />
                 <RashiBox setCurrentPage={setCurrentPage} setSelectedSign={setSelectedSign} />
-                <BookingCategories setSelectedFeature={setSelectedFeature} />
+                <BookingCategories onBookService={handleOpenBooking} />
                 <HandmadeKundliCTA />
                 <FreeCalculators setCurrentPage={setCurrentPage} />
-                <NavagrahaBooking setSelectedFeature={setSelectedFeature} />
+                <NavagrahaBooking onBookService={handleOpenBooking} />
                 
-                {/* Stats & Reviews — each manages its own padding via .section */}
+                {/* Stats & Reviews */}
                 <StatsCounter />
                 <Testimonials />
 
@@ -70,8 +82,12 @@ function App() {
               <Matchmaking key="matchmaking" />
             ) : currentPage === 'shop' ? (
               <Shop key="shop" />
-            ) : currentPage === 'puja' ? (
-              <Puja key="puja" />
+            ) : (currentPage === 'puja' || currentPage === 'pooja') ? (
+              <Puja key="puja" onBookService={handleOpenBooking} />
+            ) : currentPage === 'gallery' ? (
+              <Gallery key="gallery" setCurrentPage={setCurrentPage} />
+            ) : currentPage === 'admin' ? (
+              <AdminPanel key="admin" setCurrentPage={setCurrentPage} />
             ) : null}
           </AnimatePresence>
         </main>
@@ -83,7 +99,15 @@ function App() {
             onClose={() => setSelectedFeature(null)} 
           />
         )}
+        <BookingModal
+          isOpen={isBookingOpen}
+          onClose={() => setIsBookingOpen(false)}
+          initialService={bookingService}
+        />
+        <WhatsAppButton />
+        <AiChatbot onBookService={handleOpenBooking} />
       </div>
+    </AuthProvider>
   );
 }
 

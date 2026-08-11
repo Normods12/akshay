@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
@@ -153,14 +153,18 @@ const pujas = [
 
 const CATEGORIES = ['All', 'Planetary Remedies', 'Homa Rituals', 'Individual Planet', 'Supreme Rituals', 'Shiva Rituals', 'Dosha Remedies', 'Ancestral Rituals', 'Goddess Rituals', 'Prosperity Rituals', 'Special Rituals', 'Vastu & Home'];
 
-const PujaCard = ({ puja, index }) => {
+const PujaCard = ({ puja, index, onBookService }) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
 
   const handleBookNow = () => {
-    const phoneNumber = "919243818146";
-    const message = `Hi Ashay ji, I want to book ${puja.title} (${puja.price}). Please guide me.`;
-    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    if (onBookService) {
+      onBookService(puja);
+    } else {
+      const phoneNumber = "919243818146";
+      const message = `Hi Ashay ji, I want to book ${puja.title} (${puja.price}). Please guide me.`;
+      window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    }
   };
 
   return (
@@ -186,10 +190,17 @@ const PujaCard = ({ puja, index }) => {
         <motion.img
           whileHover={{ scale: 1.07 }}
           transition={{ duration: 0.5 }}
-          src={puja.image}
+          src={puja.image ? (puja.image.startsWith('/uploads') ? `http://localhost:3001${puja.image}` : puja.image) : '/images/puja_navagraha.png'}
           alt={puja.title}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          onError={(e) => { e.target.style.display = 'none'; }}
+          onError={(e) => {
+            if (puja.image && puja.image.startsWith('/uploads') && !e.target.dataset.triedRelative) {
+              e.target.dataset.triedRelative = 'true';
+              e.target.src = puja.image;
+            } else {
+              e.target.style.display = 'none';
+            }
+          }}
         />
         {/* Category badge */}
         <div style={{
@@ -278,9 +289,28 @@ const PujaCard = ({ puja, index }) => {
   );
 };
 
-const Puja = () => {
+const Puja = ({ onBookService }) => {
+  const [livePujas, setLivePujas] = useState(pujas);
   const [activeCategory, setActiveCategory] = useState('All');
-  const filteredPujas = activeCategory === 'All' ? pujas : pujas.filter(p => p.category === activeCategory);
+
+  useEffect(() => {
+    fetch('/api/pujas')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+          setLivePujas(data.data);
+        }
+      })
+      .catch(() => {
+        fetch('http://localhost:3001/api/pujas')
+          .then(r => r.json())
+          .then(d => { if (d.data && d.data.length > 0) setLivePujas(d.data); })
+          .catch(e => console.warn('Pujas fetch warning:', e));
+      });
+  }, []);
+
+  const dynamicCategories = ['All', ...new Set(livePujas.map(p => p.category).filter(Boolean))];
+  const filteredPujas = activeCategory === 'All' ? livePujas : livePujas.filter(p => p.category === activeCategory);
 
   return (
     <motion.div
@@ -388,7 +418,7 @@ const Puja = () => {
       <div style={{ padding: '32px 20px 0', backgroundColor: '#0a0a0a' }}>
         <div className="container">
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '8px' }}>
-            {CATEGORIES.map(cat => (
+            {dynamicCategories.map(cat => (
               <motion.button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -428,7 +458,7 @@ const Puja = () => {
             }}
           >
             {filteredPujas.map((puja, idx) => (
-              <PujaCard key={puja.title} puja={puja} index={idx} />
+              <PujaCard key={puja.title} puja={puja} index={idx} onBookService={onBookService} />
             ))}
           </motion.div>
         </AnimatePresence>

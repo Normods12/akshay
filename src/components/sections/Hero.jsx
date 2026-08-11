@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import VedicButton from '../ui/VedicButton';
 import { motion } from 'framer-motion';
 import CosmicStarfield from '../ui/CosmicStarfield';
 import SolarSystem3D from '../ui/SolarSystem3D';
 import MandalaArt from '../ui/MandalaArt';
+import LoginModal from '../auth/LoginModal';
 
-const Hero = () => {
+const Hero = ({ setCurrentPage }) => {
   const theme = useTheme();
+  const { isLoggedIn } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -173,10 +177,11 @@ const Hero = () => {
               <SolarSystem3D size={500} />
             </div>
 
-            {/* Profile Image */}
+            {/* Profile Image + View More Button */}
             <div style={{
               animation: 'float 6s ease-in-out infinite', zIndex: 2,
-              width: '70%', maxWidth: '360px', display: 'flex', justifyContent: 'center'
+              width: '70%', maxWidth: '360px', display: 'flex',
+              justifyContent: 'center', position: 'relative',
             }}>
               <img 
                 src="profile.png" 
@@ -187,10 +192,47 @@ const Hero = () => {
                   border: `1px solid ${theme.colors.primary}44`
                 }}
               />
+              {/* View More overlay button */}
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 }}
+                whileHover={{ scale: 1.07, boxShadow: `0 12px 40px rgba(212,175,55,0.5)` }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  if (isLoggedIn) {
+                    setCurrentPage('gallery');
+                  } else {
+                    setShowLogin(true);
+                  }
+                }}
+                style={{
+                  position: 'absolute', bottom: '16px', left: '50%',
+                  transform: 'translateX(-50%)',
+                  padding: '10px 28px', borderRadius: '30px',
+                  background: 'linear-gradient(135deg, rgba(212,175,55,0.95), rgba(184,134,11,0.95))',
+                  border: 'none', color: '#000',
+                  fontFamily: 'var(--font-heading)', fontWeight: 800,
+                  fontSize: '0.9rem', cursor: 'pointer',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 8px 30px rgba(212,175,55,0.35)',
+                  letterSpacing: '0.05em',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                ✦ View More
+              </motion.button>
             </div>
           </motion.div>
         </div>
       </div>
+
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          message="Sign in to explore our exclusive gallery of sacred wisdom and cosmic imagery."
+        />
+      )}
     </section>
   );
 };
