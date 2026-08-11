@@ -224,7 +224,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: `http://localhost:${PORT}/api/auth/google/callback`,
+    callbackURL: `${FRONTEND_URL}/api/auth/google/callback`,
   }, (accessToken, refreshToken, profile, done) => {
     const email = profile.emails?.[0]?.value || '';
     const users = readData('users.json');
