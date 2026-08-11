@@ -31,7 +31,7 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mannjyotishashay@gmail.com';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_dummy_key_for_development';
 const GCAL_REFRESH_TOKEN = process.env.GCAL_REFRESH_TOKEN;
 
 const resend = new Resend(RESEND_API_KEY);
@@ -220,60 +220,69 @@ app.use((req, res, next) => {
 });
 
 // ─── Google OAuth Strategy ────────────────────────────────────────────────────
-passport.use(new GoogleStrategy({
-  clientID: GOOGLE_CLIENT_ID,
-  clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: `http://localhost:${PORT}/api/auth/google/callback`,
-}, (accessToken, refreshToken, profile, done) => {
-  const email = profile.emails?.[0]?.value || '';
-  const users = readData('users.json');
+if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy({
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: `http://localhost:${PORT}/api/auth/google/callback`,
+  }, (accessToken, refreshToken, profile, done) => {
+    const email = profile.emails?.[0]?.value || '';
+    const users = readData('users.json');
 
-  let user = users.find(u => u.googleId === profile.id);
-  if (!user) {
-    // New user — check if this is the admin email
-    user = {
-      id: uuidv4(),
-      googleId: profile.id,
-      name: profile.displayName,
-      email: email,
-      picture: profile.photos?.[0]?.value || '',
-      role: email === ADMIN_EMAIL ? 'admin' : 'user',
-      registeredAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-    };
-    users.push(user);
-  } else {
-    // Existing user — update last login & picture
-    user.lastLoginAt = new Date().toISOString();
-    user.picture = profile.photos?.[0]?.value || user.picture;
-    // Ensure admin stays admin
-    if (email === ADMIN_EMAIL) user.role = 'admin';
-    const idx = users.findIndex(u => u.googleId === profile.id);
-    users[idx] = user;
-  }
+    let user = users.find(u => u.googleId === profile.id);
+    if (!user) {
+      // New user — check if this is the admin email
+      user = {
+        id: uuidv4(),
+        googleId: profile.id,
+        name: profile.displayName,
+        email: email,
+        picture: profile.photos?.[0]?.value || '',
+        role: email === ADMIN_EMAIL ? 'admin' : 'user',
+        registeredAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+      users.push(user);
+    } else {
+      // Existing user — update last login & picture
+      user.lastLoginAt = new Date().toISOString();
+      user.picture = profile.photos?.[0]?.value || user.picture;
+      // Ensure admin stays admin
+      if (email === ADMIN_EMAIL) user.role = 'admin';
+      const idx = users.findIndex(u => u.googleId === profile.id);
+      users[idx] = user;
+    }
 
-  writeData('users.json', users);
-  return done(null, user);
-}));
+    writeData('users.json', users);
+    return done(null, user);
+  }));
+} else {
+  console.warn('⚠️  GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET missing. Google OAuth disabled.');
+}
 
 // ─── Auth Routes ──────────────────────────────────────────────────────────────
-app.get('/api/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'], session: false })
-);
+app.get('/api/auth/google', (req, res, next) => {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    return res.status(503).json({ error: 'Google OAuth is not configured on this server.' });
+  }
+  passport.authenticate('google', { scope: ['profile', 'email'], session: false })(req, res, next);
+});
 
-app.get('/api/auth/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: `${FRONTEND_URL}/?auth=failed` }),
-  (req, res) => {
+app.get('/api/auth/google/callback', (req, res, next) => {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    return res.redirect(`${FRONTEND_URL}/?auth=failed`);
+  }
+  passport.authenticate('google', { session: false, failureRedirect: `${FRONTEND_URL}/?auth=failed` })(req, res, (err) => {
+    if (err) return res.redirect(`${FRONTEND_URL}/?auth=failed`);
     const user = req.user;
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, picture: user.picture, role: user.role },
       JWT_SECRET,
       { expiresIn: '30d' }
     );
-    // Redirect to frontend with token in query param — frontend reads it and stores in localStorage
     res.redirect(`${FRONTEND_URL}/?token=${token}`);
-  }
-);
+  });
+});
 
 app.get('/api/auth/me', verifyToken, (req, res) => {
   res.json({ success: true, user: req.user });
