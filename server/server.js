@@ -31,6 +31,7 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mannjyotishashay@gmail.com';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || `${FRONTEND_URL}/api/auth/google/callback`;
 const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_dummy_key_for_development';
 const GCAL_REFRESH_TOKEN = process.env.GCAL_REFRESH_TOKEN;
 
@@ -224,7 +225,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: `${FRONTEND_URL}/api/auth/google/callback`,
+    callbackURL: GOOGLE_CALLBACK_URL,
   }, (accessToken, refreshToken, profile, done) => {
     const email = profile.emails?.[0]?.value || '';
     const users = readData('users.json');
