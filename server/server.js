@@ -29,7 +29,10 @@ const PORT = process.env.PORT || 3001;
 // ─── Config ──────────────────────────────────────────────────────────────────
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mannjyotishashay@gmail.com';
+const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || 'mannjyotishashay@gmail.com,smaddirala23@gmail.com,smaddirala90@gmail.com')
+  .split(',')
+  .map(e => e.trim().toLowerCase());
+const ADMIN_EMAIL = ADMIN_EMAILS[0] || 'mannjyotishashay@gmail.com';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://mannjyotish.com';
 const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || `${FRONTEND_URL}/api/auth/google/callback`;
 
@@ -240,18 +243,19 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
     callbackURL: GOOGLE_CALLBACK_URL,
   }, (accessToken, refreshToken, profile, done) => {
     const email = profile.emails?.[0]?.value || '';
+    const isUserAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
     const users = readData('users.json');
 
     let user = users.find(u => u.googleId === profile.id);
     if (!user) {
-      // New user — check if this is the admin email
+      // New user — check if this is an admin email
       user = {
         id: uuidv4(),
         googleId: profile.id,
         name: profile.displayName,
         email: email,
         picture: profile.photos?.[0]?.value || '',
-        role: email === ADMIN_EMAIL ? 'admin' : 'user',
+        role: isUserAdmin ? 'admin' : 'user',
         registeredAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
       };
@@ -260,8 +264,8 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
       // Existing user — update last login & picture
       user.lastLoginAt = new Date().toISOString();
       user.picture = profile.photos?.[0]?.value || user.picture;
-      // Ensure admin stays admin
-      if (email === ADMIN_EMAIL) user.role = 'admin';
+      // Ensure admin stays admin if in ADMIN_EMAILS
+      if (isUserAdmin) user.role = 'admin';
       const idx = users.findIndex(u => u.googleId === profile.id);
       users[idx] = user;
     }
