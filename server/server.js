@@ -52,14 +52,21 @@ const GCAL_REFRESH_TOKEN = process.env.GCAL_REFRESH_TOKEN;
 
 const resend = new Resend(RESEND_API_KEY);
 
-// ─── Google Calendar API Client ───────────────────────────────────────────────
-const gcalAuth = new google.auth.OAuth2(
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  'http://localhost:4000/oauth2callback'
-);
-gcalAuth.setCredentials({ refresh_token: GCAL_REFRESH_TOKEN });
-const gcal = google.calendar({ version: 'v3', auth: gcalAuth });
+// ─── Google Calendar API Client (lazy init — avoids startup block) ────────────
+let _gcal = null;
+function getGcal() {
+  if (!_gcal) {
+    const gcalAuth = new google.auth.OAuth2(
+      GOOGLE_CLIENT_ID,
+      GOOGLE_CLIENT_SECRET,
+      'http://localhost:4000/oauth2callback'
+    );
+    if (GCAL_REFRESH_TOKEN) gcalAuth.setCredentials({ refresh_token: GCAL_REFRESH_TOKEN });
+    _gcal = google.calendar({ version: 'v3', auth: gcalAuth });
+  }
+  return _gcal;
+}
+
 
 /**
  * insertGoogleCalendarEvent — Directly creates event on Ashay's Google Calendar
@@ -90,7 +97,7 @@ async function insertGoogleCalendarEvent({ title, description, location, date, t
     attendees.push({ email: clientEmail, responseStatus: 'accepted', displayName: clientName || 'Client' });
   }
 
-  const event = await gcal.events.insert({
+  const event = await getGcal().events.insert({
     calendarId: 'primary',
     sendUpdates: 'all', // Sends native Google Calendar invite to client automatically
     requestBody: {

@@ -19,12 +19,14 @@ import { useTheme } from '../../context/ThemeContext';
 
 const PLANET_COLORS = {
   Sun: '#c48100', Moon: '#4a4a8a', Mars: '#c02020', Mercury: '#007a6e',
-  Jupiter: '#b05000', Venus: '#a02070', Saturn: '#4030a0', Rahu: '#303040', Ketu: '#6a3010'
+  Jupiter: '#b05000', Venus: '#a02070', Saturn: '#4030a0', Rahu: '#303040', Ketu: '#6a3010',
+  Uranus: '#0099cc', Neptune: '#3333cc', Pluto: '#990099'
 };
 
 const PLANET_SYMBOLS = {
   Sun: 'Su', Moon: 'Mo', Mars: 'Ma', Mercury: 'Me',
-  Jupiter: 'Ju', Venus: 'Ve', Saturn: 'Sa', Rahu: 'Ra', Ketu: 'Ke'
+  Jupiter: 'Ju', Venus: 'Ve', Saturn: 'Sa', Rahu: 'Ra', Ketu: 'Ke',
+  Uranus: 'Ur', Neptune: 'Ne', Pluto: 'Pl'
 };
 
 const W = 360;

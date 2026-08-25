@@ -50,6 +50,91 @@ const FormField = ({ label, type = 'text', value, onChange, placeholder, require
   );
 };
 
+// ─── AM/PM Time Picker ────────────────────────────────────────────────────────────
+const TimePickerField = ({ label, value, onChange, required }) => {
+  const { colors } = useTheme();
+
+  // Parse existing HH:MM value (24h) into parts
+  const parse = (v) => {
+    if (!v) return { hour: '12', minute: '00', ampm: 'AM' };
+    const [hh, mm] = v.split(':').map(Number);
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    const hour = hh % 12 === 0 ? '12' : String(hh % 12);
+    return { hour, minute: String(mm).padStart(2, '0'), ampm };
+  };
+
+  const { hour, minute, ampm } = parse(value);
+
+  const toHHMM = (h, m, ap) => {
+    let hh = parseInt(h, 10);
+    if (ap === 'PM' && hh !== 12) hh += 12;
+    if (ap === 'AM' && hh === 12) hh = 0;
+    return `${String(hh).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  };
+
+  const set = (field, val) => {
+    const next = { hour, minute, ampm, [field]: val };
+    onChange(toHHMM(next.hour, next.minute, next.ampm));
+  };
+
+  const selectStyle = {
+    padding: '13px 10px', borderRadius: '10px',
+    border: `1.5px solid ${colors.outline}55`,
+    backgroundColor: 'transparent',
+    color: colors.text, fontFamily: 'var(--font-body)', fontSize: '1rem',
+    outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center',
+    paddingRight: '28px', transition: 'border-color 0.2s',
+    boxSizing: 'border-box', width: '100%',
+  };
+
+  const hours   = Array.from({ length: 12 }, (_, i) => String(i + 1));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <label style={{
+        fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.05em',
+        color: colors.text, opacity: 0.65,
+        textTransform: 'uppercase', fontFamily: 'var(--font-body)',
+      }}>
+        {label} {required && <span style={{ color: colors.primary }}>*</span>}
+      </label>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1.3fr', gap: '8px' }}>
+        {/* Hour */}
+        <div style={{ position: 'relative' }}>
+          <select value={hour} onChange={e => set('hour', e.target.value)}
+            required={required} style={selectStyle}>
+            {hours.map(h => <option key={h} value={h}>{h}</option>)}
+          </select>
+        </div>
+        {/* Minute */}
+        <div style={{ position: 'relative' }}>
+          <select value={minute} onChange={e => set('minute', e.target.value)}
+            style={selectStyle}>
+            {minutes.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </div>
+        {/* AM / PM */}
+        <div style={{ position: 'relative' }}>
+          <select value={ampm} onChange={e => set('ampm', e.target.value)}
+            style={{ ...selectStyle, fontWeight: 700, color: ampm === 'AM' ? '#4CAF50' : colors.primary }}>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+      </div>
+      {/* Display preview */}
+      {value && (
+        <p style={{ margin: 0, fontSize: '0.72rem', color: colors.primary, opacity: 0.8 }}>
+          ⏰ {hour}:{minute} {ampm} — {value} (24h)
+        </p>
+      )}
+    </div>
+  );
+};
+
 // ─── Location Picker (dropdown autocomplete) ─────────────────────────────────
 const LocationPicker = ({ value, onChange, onLocationSelect, required }) => {
   const { colors, themeMode } = useTheme();
@@ -314,7 +399,8 @@ const LoadingScreen = ({ name }) => {
 // ─── Planet Debug Table ──────────────────────────────────────────────────────
 const PLANET_COLORS_MAP = {
   Sun:'#FFD700', Moon:'#C0C0C0', Mars:'#FF5555', Mercury:'#40E0D0',
-  Jupiter:'#FFB347', Venus:'#FF9EC4', Saturn:'#AA77FF', Rahu:'#888', Ketu:'#CD853F', ASCENDANT:'#d4af37'
+  Jupiter:'#FFB347', Venus:'#FF9EC4', Saturn:'#AA77FF', Rahu:'#888', Ketu:'#CD853F',
+  Uranus:'#00E5FF', Neptune:'#2979FF', Pluto:'#D500F9', ASCENDANT:'#d4af37'
 };
 
 const PlanetDebugTable = ({ result }) => {
@@ -503,10 +589,8 @@ const FreeKundli = () => {
                   <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                     <FormField label="Full Name" value={formData.name} onChange={update('name')} placeholder="Enter your full name" required />
 
-                    <div className="kundli-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                      <FormField label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={update('dateOfBirth')} required />
-                      <FormField label="Time of Birth" type="time" value={formData.timeOfBirth} onChange={update('timeOfBirth')} required />
-                    </div>
+                    <FormField label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={update('dateOfBirth')} required />
+                    <TimePickerField label="Time of Birth" value={formData.timeOfBirth} onChange={update('timeOfBirth')} required />
 
 
                     {/* Location Picker */}
