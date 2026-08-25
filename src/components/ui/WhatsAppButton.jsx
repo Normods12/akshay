@@ -11,30 +11,13 @@ export default function WhatsAppButton() {
       rel="noopener noreferrer"
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      style={{
-        position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        zIndex: 9990,
-        width: '60px',
-        height: '60px',
-        borderRadius: '50%',
-        backgroundColor: '#25D366',
-        color: '#ffffff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 8px 24px rgba(37, 211, 102, 0.4), 0 0 0 4px rgba(37, 211, 102, 0.15)',
-        cursor: 'pointer',
-        textDecoration: 'none',
-      }}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.92 }}
+      className="sticky-whatsapp-btn"
       title="Chat on WhatsApp"
     >
       <svg
-        width="34"
-        height="34"
+        className="sticky-whatsapp-icon"
         viewBox="0 0 24 24"
         fill="currentColor"
       >

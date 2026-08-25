@@ -349,8 +349,17 @@ app.post('/api/kundali', async (req, res) => {
     // Log report
     try {
       const reports = readData('reports.json');
-      reports.unshift({ id: uuidv4(), type: 'kundali', name, email: req.body.email || null, generatedAt: new Date().toISOString() });
-      writeData('reports.json', reports.slice(0, 500));
+      reports.unshift({
+        id: uuidv4(),
+        type: 'kundali',
+        name,
+        email: req.body.email || null,
+        dateOfBirth,
+        timeOfBirth,
+        birthPlace: birthPlace || `${latitude}, ${longitude}`,
+        generatedAt: new Date().toISOString()
+      });
+      writeData('reports.json', reports.slice(0, 1000));
     } catch (e) {}
 
     res.json({
@@ -571,9 +580,22 @@ app.delete('/api/admin/shop/:id', verifyToken, requireAdmin, (req, res) => {
 // ─── Admin: Users ─────────────────────────────────────────────────────────────
 app.get('/api/admin/users', verifyToken, requireAdmin, (req, res) => {
   const users = readData('users.json');
-  // Never expose googleId
-  const safe = users.map(({ googleId, ...u }) => u);
+  const reports = readData('reports.json');
+
+  const safe = users.map(({ googleId, ...u }) => {
+    const userReports = reports.filter(r => r.email && u.email && r.email.toLowerCase() === u.email.toLowerCase());
+    return {
+      ...u,
+      kundliCount: userReports.length,
+      lastKundliAt: userReports.length > 0 ? userReports[0].generatedAt : null
+    };
+  });
   res.json({ success: true, data: safe });
+});
+
+app.get('/api/admin/reports', verifyToken, requireAdmin, (req, res) => {
+  const reports = readData('reports.json');
+  res.json({ success: true, data: reports });
 });
 
 app.put('/api/admin/users/:id/role', verifyToken, requireAdmin, (req, res) => {
