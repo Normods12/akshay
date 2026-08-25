@@ -257,16 +257,11 @@ const BookingCategories = ({ onBookService }) => {
               style={{ cursor: 'pointer' }}
               transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.1 }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid rgba(212,175,55,0.2)' }}>
-                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.1rem', color: '#d4af37' }}>
+              <div className="booking-card-footer">
+                <span className="booking-card-price">
                   {category.price}
                 </span>
-                <span style={{
-                  padding: '8px 16px', borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #d4af37, #b8860b)',
-                  color: '#000', fontFamily: 'var(--font-heading)',
-                  fontWeight: 700, fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '4px'
-                }}>
+                <span className="booking-card-btn">
                   Book Session ›
                 </span>
               </div>
