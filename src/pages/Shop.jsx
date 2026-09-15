@@ -50,7 +50,7 @@ const Shop = ({ onBookService }) => {
   }, []);
 
   const handleShopClick = (item) => {
-    const phoneNumber = "919243818146";
+    const phoneNumber = "917000742315";
     const msg = `Namaste Ashay ji, I am interested in purchasing "${item.title}" (${item.price || ''}). Please share details and ordering instructions.`;
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(msg)}`, '_blank');
   };

@@ -248,7 +248,7 @@ const BookingForm = () => {
                   whileFocus={{ scale: 1.02, borderBottomColor: theme.colors.primary }}
                   type="tel" 
                   name="whatsapp" 
-                  placeholder="+91 XXXXX XXXXX" 
+                  placeholder="+91 70007 42315" 
                   required 
                   style={inputStyle}
                   value={formData.whatsapp}

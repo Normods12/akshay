@@ -132,14 +132,27 @@ const ContactDetails = () => {
           <h3 style={{ fontFamily: 'var(--font-heading)', color: colors.primary, fontSize: '1.5rem', marginBottom: '10px' }}>
             Get in Touch
           </h3>
+          <p style={{ fontSize: '0.9rem', color: colors.primary, opacity: 0.9, fontWeight: 600 }}>
+            Acharya Shri Hit Ashay Krishn Goswami
+          </p>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ padding: '12px', backgroundColor: `${colors.primary}15`, borderRadius: '50%' }}>
               <Phone size={24} color={colors.primary} />
             </div>
             <div>
-              <p style={{ fontSize: '0.85rem', color: colors.text, opacity: 0.6 }}>Phone / WhatsApp</p>
-              <p style={{ fontSize: '1.1rem', fontWeight: 600, color: colors.text }}>+91 98765 43210</p>
+              <p style={{ fontSize: '0.85rem', color: colors.text, opacity: 0.6 }}>Direct Contact / Enquiries</p>
+              <a href="tel:+919243818146" style={{ fontSize: '1.1rem', fontWeight: 600, color: colors.text, textDecoration: 'none' }}>+91 92438 18146</a>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ padding: '12px', backgroundColor: `${colors.primary}15`, borderRadius: '50%' }}>
+              <Phone size={24} color="#25D366" />
+            </div>
+            <div>
+              <p style={{ fontSize: '0.85rem', color: colors.text, opacity: 0.6 }}>WhatsApp Support</p>
+              <a href="https://wa.me/917000742315" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', fontWeight: 600, color: '#25D366', textDecoration: 'none' }}>+91 70007 42315</a>
             </div>
           </div>
 
@@ -164,13 +177,19 @@ const ContactDetails = () => {
           </div>
 
           <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: `1px solid ${colors.outline}33` }}>
-            <p style={{ fontSize: '0.9rem', color: colors.text, opacity: 0.8, marginBottom: '12px' }}>Follow us on social media</p>
+            <p style={{ fontSize: '0.9rem', color: colors.text, opacity: 0.8, marginBottom: '12px' }}>
+              Follow on Instagram: <a href="https://www.instagram.com/goswami_ashay" target="_blank" rel="noopener noreferrer" style={{ color: colors.primary, fontWeight: 700, textDecoration: 'none' }}>@goswami_ashay</a>
+            </p>
             <div style={{ display: 'flex', gap: '16px' }}>
-              {[InstagramIcon, FacebookIcon, YoutubeIcon].map((Icon, idx) => (
-                <a key={idx} href="#" style={{ color: colors.primary, opacity: 0.8, transition: 'opacity 0.3s' }} onMouseEnter={e => e.target.style.opacity = 1} onMouseLeave={e => e.target.style.opacity = 0.8}>
-                  <Icon size={24} color={colors.primary} />
-                </a>
-              ))}
+              <a href="https://www.instagram.com/goswami_ashay" target="_blank" rel="noopener noreferrer" style={{ color: colors.primary, opacity: 0.9, transition: 'opacity 0.3s' }}>
+                <InstagramIcon size={24} color={colors.primary} />
+              </a>
+              <a href="#" style={{ color: colors.primary, opacity: 0.8, transition: 'opacity 0.3s' }}>
+                <FacebookIcon size={24} color={colors.primary} />
+              </a>
+              <a href="#" style={{ color: colors.primary, opacity: 0.8, transition: 'opacity 0.3s' }}>
+                <YoutubeIcon size={24} color={colors.primary} />
+              </a>
             </div>
           </div>
         </motion.div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export default function WhatsAppButton() {
-  const whatsappUrl = `https://wa.me/919243818146?text=${encodeURIComponent('Namaste Ashay ji! I would like to inquire about Vedic astrology consultations & pujas.')}`;
+  const whatsappUrl = `https://wa.me/917000742315?text=${encodeURIComponent('Namaste Ashay ji! I would like to inquire about Vedic astrology consultations & pujas.')}`;
 
   return (
     <motion.a

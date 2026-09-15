@@ -161,7 +161,7 @@ const PujaCard = ({ puja, index, onBookService }) => {
     if (onBookService) {
       onBookService(puja);
     } else {
-      const phoneNumber = "919243818146";
+      const phoneNumber = "917000742315";
       const message = `Hi Ashay ji, I want to book ${puja.title} (${puja.price}). Please guide me.`;
       window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     }
@@ -474,7 +474,7 @@ const Puja = ({ onBookService }) => {
             Prices may vary based on specific requirements and scale of the ritual. Contact us for detailed consultation before booking.
           </p>
           <motion.a
-            href={`https://wa.me/919243818146?text=${encodeURIComponent('Hi Ashay ji, I want to enquire about Online Puja services.')}`}
+            href={`https://wa.me/917000742315?text=${encodeURIComponent('Hi Ashay ji, I want to enquire about Online Puja services.')}`}
             target="_blank" rel="noopener noreferrer"
             whileHover={{ scale: 1.03 }}
             style={{

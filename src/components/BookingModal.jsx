@@ -164,7 +164,7 @@ export default function BookingModal({ isOpen, onClose, initialService }) {
   };
 
   const handleWhatsAppOpen = () => {
-    const phoneNumber = "919243818146";
+    const phoneNumber = "917000742315";
     const birthInfo = formData.birthDate ? `\nBirth Details: Date: ${formData.birthDate}, Time: ${formData.birthTime || 'N/A'}, Place: ${formData.birthPlace || 'N/A'}` : '';
     const msg = `Hi Ashay ji, I am booking ${service.title} (${service.price || ''}) for ${selectedDate} at ${selectedSlot}.\nClient Name: ${formData.name || 'Client'}\nWhatsApp: ${formData.whatsapp || ''}${birthInfo}${formData.notes ? `\nNotes: ${formData.notes}` : ''}`;
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -434,7 +434,7 @@ export default function BookingModal({ isOpen, onClose, initialService }) {
                   <div>
                     <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', marginBottom: '4px', display: 'block' }}>WhatsApp Number *</label>
                     <input
-                      type="tel" name="whatsapp" placeholder="+91 98765 43210" required
+                      type="tel" name="whatsapp" placeholder="+91 70007 42315" required
                       value={formData.whatsapp} onChange={handleChange}
                       style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(212,175,55,0.3)', color: '#fff', outline: 'none', boxSizing: 'border-box' }}
                     />

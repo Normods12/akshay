@@ -28,7 +28,7 @@ const Courses = () => {
   ];
 
   const handleEnroll = (courseTitle) => {
-    const phoneNumber = "919243818146";
+    const phoneNumber = "917000742315";
     const message = `Hi Ashay, I am interested in enrolling for the "${courseTitle}" course. Please provide more details.`;
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
@@ -38,7 +38,7 @@ const Courses = () => {
       <section className="container">
         <SectionHeading>Mannjyotish Academy</SectionHeading>
         
-        {/* Video Feature */}
+        {/* Poster Image Feature */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -47,40 +47,40 @@ const Courses = () => {
           style={{ 
             marginTop: '60px', 
             marginBottom: '80px',
-            textAlign: 'center'
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
           }}
         >
           <h3 style={{ 
             fontFamily: 'var(--font-heading)', 
             marginBottom: '32px',
-            color: theme.colors.primary 
+            color: theme.colors.primary,
+            fontSize: '1.8rem'
           }}>
             Introduction to Vedic Wisdom
           </h3>
           <div style={{ 
             position: 'relative', 
-            paddingBottom: '56.25%', 
-            height: 0, 
+            maxWidth: '750px', 
+            width: '100%',
             overflow: 'hidden',
-            borderRadius: '16px',
-            boxShadow: 'var(--shadow-gold)',
-            backgroundColor: '#000',
-            border: `1px solid ${theme.colors.outline}33`
+            borderRadius: '20px',
+            boxShadow: '0 12px 40px rgba(212,175,55,0.25)',
+            border: `1px solid ${theme.colors.outline}44`
           }}>
-            <iframe 
+            <img 
+              src="/images/vedic-astrology-classes.jpg" 
+              alt="MannJyotish Vedic Astrology Classes - Discover the Ancient Wisdom of the Vedas"
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
                 width: '100%',
-                height: '100%',
-                border: 0
+                height: 'auto',
+                display: 'block',
+                borderRadius: '20px',
+                transition: 'transform 0.5s ease'
               }}
-              src="https://www.youtube.com/embed/2GasDsqo8JA?list=PLiUoKTT-PqD2ese2Ww4bJQvZ-7C7CEKnB" 
-              title="Introduction to Vedic Wisdom"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowFullScreen
-            ></iframe>
+            />
           </div>
         </motion.div>
 
