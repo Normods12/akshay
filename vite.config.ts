@@ -6,6 +6,8 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   server: {
+    port: 5188,
+    strictPort: true,
     proxy: {
       // Forward all /api/* requests to the Swiss Ephemeris Node.js backend
       '/api': {

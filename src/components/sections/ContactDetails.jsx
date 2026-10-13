@@ -142,7 +142,7 @@ const ContactDetails = () => {
             </div>
             <div>
               <p style={{ fontSize: '0.85rem', color: colors.text, opacity: 0.6 }}>Direct Contact / Enquiries</p>
-              <a href="tel:+919243818146" style={{ fontSize: '1.1rem', fontWeight: 600, color: colors.text, textDecoration: 'none' }}>+91 92438 18146</a>
+              <a href="tel:+917000742315" style={{ fontSize: '1.1rem', fontWeight: 600, color: colors.text, textDecoration: 'none' }}>+91 70007 42315</a>
             </div>
           </div>
 

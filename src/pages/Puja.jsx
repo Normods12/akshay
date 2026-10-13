@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import MandalaArt from '../components/ui/MandalaArt';
+import AnimatedChakra from '../components/ui/AnimatedChakra';
+import CosmicStarfield from '../components/ui/CosmicStarfield';
 
 const pujas = [
   {
@@ -409,35 +411,77 @@ const Puja = ({ onBookService }) => {
         </div>
       </div>
 
-      {/* Category Filter */}
-      <div style={{ padding: '32px 20px 0', backgroundColor: '#0a0a0a' }}>
-        <div className="container">
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '8px' }}>
-            {dynamicCategories.map(cat => (
-              <motion.button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                style={{
-                  padding: '7px 16px', borderRadius: '20px',
-                  border: `1px solid ${activeCategory === cat ? 'rgba(212,175,55,0.8)' : 'rgba(212,175,55,0.2)'}`,
-                  backgroundColor: activeCategory === cat ? 'rgba(212,175,55,0.15)' : 'transparent',
-                  color: activeCategory === cat ? '#d4af37' : '#a0a0a0',
-                  fontFamily: 'var(--font-body)', fontSize: '0.78rem',
-                  fontWeight: activeCategory === cat ? 700 : 400,
-                  cursor: 'pointer', transition: 'all 0.2s',
-                }}
-              >
-                {cat}
-              </motion.button>
-            ))}
+      {/* Main Content Area with Rotating Sacred Designs */}
+      <div style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#09090c' }}>
+        {/* Cosmic Starfield Ambient Layer */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, opacity: 0.35 }}>
+          <CosmicStarfield starCount={50} opacity={0.3} mouseReactive={false} />
+        </div>
+
+        {/* Central Rotating Golden Sacred Chakra */}
+        <AnimatedChakra
+          size={650}
+          opacity={0.1}
+          style={{ top: '40%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 0 }}
+        />
+
+        {/* Left Side Rotating Vector Mandala */}
+        <MandalaArt
+          variant={1}
+          size={520}
+          opacity={0.08}
+          speed={40}
+          style={{ top: '15%', left: '-200px', zIndex: 0, pointerEvents: 'none' }}
+        />
+
+        {/* Right Side Counter-Rotating Vector Mandala */}
+        <MandalaArt
+          variant={0}
+          size={500}
+          opacity={0.08}
+          speed={45}
+          direction={-1}
+          style={{ bottom: '10%', right: '-200px', zIndex: 0, pointerEvents: 'none' }}
+        />
+
+        {/* Soft Radial Gold Aura */}
+        <div style={{
+          position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)',
+          width: '700px', height: '700px',
+          background: 'radial-gradient(circle, rgba(212,175,55,0.07) 0%, transparent 70%)',
+          pointerEvents: 'none', zIndex: 0
+        }} />
+
+        {/* Category Filter */}
+        <div style={{ padding: '36px 20px 0', position: 'relative', zIndex: 1 }}>
+          <div className="container">
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '8px' }}>
+              {dynamicCategories.map(cat => (
+                <motion.button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  style={{
+                    padding: '7px 16px', borderRadius: '20px',
+                    border: `1px solid ${activeCategory === cat ? 'rgba(212,175,55,0.8)' : 'rgba(212,175,55,0.2)'}`,
+                    backgroundColor: activeCategory === cat ? 'rgba(212,175,55,0.15)' : 'rgba(20,20,25,0.6)',
+                    color: activeCategory === cat ? '#d4af37' : '#a0a0a0',
+                    fontFamily: 'var(--font-body)', fontSize: '0.78rem',
+                    fontWeight: activeCategory === cat ? 700 : 400,
+                    cursor: 'pointer', transition: 'all 0.2s',
+                    backdropFilter: 'blur(6px)',
+                  }}
+                >
+                  {cat}
+                </motion.button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Pujas Grid */}
-      <div className="container" style={{ padding: '40px 20px 80px' }}>
+        {/* Pujas Grid */}
+        <div className="container" style={{ padding: '40px 20px 80px', position: 'relative', zIndex: 1 }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeCategory}
@@ -490,8 +534,9 @@ const Puja = ({ onBookService }) => {
           </motion.a>
         </motion.div>
       </div>
-    </motion.div>
-  );
+    </div>
+  </motion.div>
+);
 };
 
 export default Puja;

@@ -20,7 +20,8 @@
     "react-router-dom": "^7.16.0",
     "resend": "^6.18.1",
     "ssh2": "^1.17.0",
-    "vedic-astro": "^0.1.1"
+    "vedic-astro": "^0.1.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

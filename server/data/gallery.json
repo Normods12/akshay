@@ -1,9 +1,50 @@
 [
   {
     "id": "7735b2d6-ebdf-42a4-842d-f4c4a1b1af0f",
-    "title": "TEst",
-    "description": "",
+    "title": "Sacred Darshan & Blessings from Vrindavan Dham 🌸",
+    "description": "Offering prayers for the health, prosperity, and spiritual evolution of all seekers. May the grace of Shri Hit Harivansh Mahaprabhu illuminate your life journey. 🕉️✨ #VedicAstrology #VrindavanDham #Radhavallabh #AshayGoswami #SpiritualAwakening",
+    "location": "Radhavallabh Temple · Vrindavan Dham",
+    "mediaType": "image",
+    "mediaUrl": "/uploads/1dea0d4c-67ce-4241-bffe-8f0188f01e2b.png",
     "image": "/uploads/1dea0d4c-67ce-4241-bffe-8f0188f01e2b.png",
+    "likes": 1420,
+    "order": 1,
     "createdAt": "2026-08-08T17:21:27.722Z"
+  },
+  {
+    "id": "gal-post-2",
+    "title": "Celestial Planetary Alignments & Deep Meditation Reel 🎥✨",
+    "description": "Understanding the cosmic dance of Navagrahas. When Mars, Jupiter, and Saturn align with your natal Moon, powerful spiritual transformations unfold. Meditate on the sacred syllables today. 🪐⚡ #JyotishVidya #Navagraha #CosmicWisdom #Kundali #VedicAstrology",
+    "location": "Mannjyotish Vedic Ashram · Mathura",
+    "mediaType": "video",
+    "mediaUrl": "/hero-animation/hero-1.mp4",
+    "image": "/hero-animation/hero-1.mp4",
+    "likes": 2185,
+    "order": 2,
+    "createdAt": "2026-08-10T12:00:00.000Z"
+  },
+  {
+    "id": "gal-post-3",
+    "title": "Navagraha Shanti & Maha Rudrabhishek Highlights 🪔🌿",
+    "description": "Glimpse of today's special Vedic Yajna performed for neutralizing planetary afflictions (Graha Dosha) and welcoming divine peace and vitality into family life. Prana Pratishtha completed with authentic Samavedic chants. 🕉️ #Rudrabhishek #VedicPuja #Remedies #ShantiPuja",
+    "location": "Shri Radha Kripa Niketan · Vrindavan",
+    "mediaType": "image",
+    "mediaUrl": "/images/puja_rudrabhishek.png",
+    "image": "/images/puja_rudrabhishek.png",
+    "likes": 1890,
+    "order": 3,
+    "createdAt": "2026-08-12T09:30:00.000Z"
+  },
+  {
+    "id": "gal-post-4",
+    "title": "Authentic Certified Gemstones & Energized Rudraksha 💎📿",
+    "description": "Every ratna and rudraksha bead is carefully purified at the sacred Yamuna banks and consecrated according to your personal Janma Kundali. Never wear unenergized stones. Divine vibrations await. ✦ #OriginalRudraksha #VedicGemstones #MannjyotishShop #AstroRemedies",
+    "location": "Mannjyotish Gems & Sacred Store · Vrindavan",
+    "mediaType": "image",
+    "mediaUrl": "/images/shop_rudraksha.png",
+    "image": "/images/shop_rudraksha.png",
+    "likes": 1342,
+    "order": 4,
+    "createdAt": "2026-08-15T15:15:00.000Z"
   }
 ]

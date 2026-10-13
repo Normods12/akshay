@@ -22,9 +22,11 @@ import Shop from './pages/Shop';
 import Puja from './pages/Puja';
 import Gallery from './pages/Gallery';
 import AdminPanel from './pages/AdminPanel';
+import AboutAcharya from './pages/AboutAcharya';
 import BookingModal from './components/BookingModal';
 import WhatsAppButton from './components/ui/WhatsAppButton';
 import AiChatbot from './components/ui/AiChatbot';
+import FirstQuestionModal from './components/ui/FirstQuestionModal';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -34,10 +36,19 @@ function App() {
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [bookingService, setBookingService] = useState(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [showFirstQuestion, setShowFirstQuestion] = useState(false);
 
   const handleOpenBooking = (service) => {
     setBookingService(service);
     setIsBookingOpen(true);
+  };
+
+  const handleVideoLoaded = () => {
+    if (!sessionStorage.getItem('mannjyotish_first_question_seen')) {
+      setTimeout(() => {
+        setShowFirstQuestion(true);
+      }, 700);
+    }
   };
 
   return (
@@ -58,7 +69,7 @@ function App() {
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
               >
-                <Hero setCurrentPage={setCurrentPage} />
+                <Hero setCurrentPage={setCurrentPage} onVideoLoaded={handleVideoLoaded} />
                 <RashiBox setCurrentPage={setCurrentPage} setSelectedSign={setSelectedSign} />
                 <BookingCategories onBookService={handleOpenBooking} />
                 <HandmadeKundliCTA />
@@ -74,6 +85,8 @@ function App() {
               </motion.div>
             ) : currentPage === 'courses' ? (
               <Courses key="courses" />
+            ) : currentPage === 'about-acharya' ? (
+              <AboutAcharya key="about-acharya" setCurrentPage={setCurrentPage} />
             ) : currentPage === 'free-kundli' ? (
               <FreeKundli key="free-kundli" />
             ) : currentPage === 'moon-sign' ? (
@@ -105,7 +118,15 @@ function App() {
           initialService={bookingService}
         />
         <WhatsAppButton />
-        <AiChatbot onBookService={handleOpenBooking} />
+        {/* On Courses page, sticky Demo Class button replaces the floating chatbot */}
+        {currentPage !== 'courses' && <AiChatbot onBookService={handleOpenBooking} />}
+        <FirstQuestionModal
+          isOpen={showFirstQuestion}
+          onClose={() => {
+            setShowFirstQuestion(false);
+            sessionStorage.setItem('mannjyotish_first_question_seen', 'true');
+          }}
+        />
       </div>
     </AuthProvider>
   );

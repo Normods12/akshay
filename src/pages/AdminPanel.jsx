@@ -140,28 +140,72 @@ function GalleryManager({ token }) {
   const [posts, setPosts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '' });
-  const [imageFile, setImageFile] = useState(null);
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    location: 'Vrindavan Dham · Radhavallabh Temple',
+    mediaType: 'image',
+    mediaUrl: '',
+    likes: 1200,
+    order: 1
+  });
+  const [mediaFile, setMediaFile] = useState(null);
 
   const load = () => fetch(`${API_BASE}/api/gallery`).then(r => r.json()).then(d => setPosts(d.data || []));
   useEffect(() => { load(); }, []);
 
-  const openAdd = () => { setEditing(null); setForm({ title: '', description: '' }); setImageFile(null); setShowForm(true); };
-  const openEdit = (p) => { setEditing(p); setForm({ title: p.title, description: p.description }); setImageFile(null); setShowForm(true); };
+  const openAdd = () => {
+    setEditing(null);
+    setForm({
+      title: '',
+      description: '',
+      location: 'Vrindavan Dham · Radhavallabh Temple',
+      mediaType: 'image',
+      mediaUrl: '',
+      likes: Math.floor(Math.random() * 500) + 800,
+      order: posts.length > 0 ? Math.max(...posts.map(p => Number(p.order || 0))) + 1 : 1
+    });
+    setMediaFile(null);
+    setShowForm(true);
+  };
+
+  const openEdit = (p) => {
+    setEditing(p);
+    setForm({
+      title: p.title || '',
+      description: p.description || '',
+      location: p.location || 'Vrindavan Dham · Radhavallabh Temple',
+      mediaType: p.mediaType || (p.image?.endsWith('.mp4') ? 'video' : 'image'),
+      mediaUrl: p.mediaUrl || p.image || '',
+      likes: p.likes || 1200,
+      order: p.order !== undefined ? p.order : 1
+    });
+    setMediaFile(null);
+    setShowForm(true);
+  };
 
   const save = async () => {
     const fd = new FormData();
     fd.append('title', form.title);
     fd.append('description', form.description);
-    if (imageFile) fd.append('image', imageFile);
+    fd.append('location', form.location);
+    fd.append('mediaType', form.mediaType);
+    fd.append('likes', form.likes);
+    fd.append('order', form.order);
+    if (form.mediaUrl) fd.append('mediaUrl', form.mediaUrl);
+    if (mediaFile) {
+      fd.append('media', mediaFile);
+      fd.append('image', mediaFile); // backward compatibility
+    }
     const url = editing ? `${API_BASE}/api/gallery/${editing.id}` : `${API_BASE}/api/gallery`;
     const method = editing ? 'PUT' : 'POST';
     await fetch(url, { method, headers: { Authorization: `Bearer ${token}` }, body: fd });
-    setShowForm(false); load();
+    setShowForm(false);
+    load();
   };
 
   const del = async (id) => {
-    if (!confirm('Delete this post?')) return;
+    if (!confirm('Delete this Instagram gallery post?')) return;
     await fetch(`${API_BASE}/api/gallery/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     load();
   };
@@ -169,39 +213,121 @@ function GalleryManager({ token }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={sectionTitle}>Gallery Manager</h2>
-        <Btn onClick={openAdd}>+ Add Post</Btn>
+        <div>
+          <h2 style={sectionTitle}>📸 Instagram Sacred Gallery Manager</h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem', margin: '4px 0 0' }}>
+            Control feed posts, videos/reels, captions, locations, likes, and sequence order.
+          </p>
+        </div>
+        <Btn onClick={openAdd}>+ New Instagram Post</Btn>
       </div>
 
       {showForm && (
-        <FormCard title={editing ? 'Edit Post' : 'New Gallery Post'} onClose={() => setShowForm(false)} onSave={save}>
-          <Field label="Title"><Inp value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></Field>
-          <Field label="Description"><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></Field>
-          <Field label="Image"><input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} style={{ color: '#fff', fontFamily: 'var(--font-body)', fontSize: '0.85rem' }} /></Field>
+        <FormCard title={editing ? 'Edit Instagram Post' : 'Create New Instagram Post'} onClose={() => setShowForm(false)} onSave={save}>
+          <Field label="Post Title / Headline">
+            <Inp value={form.title} placeholder="e.g. Sacred Darshan & Blessings from Vrindavan Dham 🌸" onChange={e => setForm({ ...form, title: e.target.value })} />
+          </Field>
+          <Field label="Caption & Hashtags">
+            <Textarea value={form.description} rows={4} placeholder="Full caption text, spiritual insights, #VedicAstrology #Vrindavan..." onChange={e => setForm({ ...form, description: e.target.value })} />
+          </Field>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <Field label="Location Tag">
+              <Inp value={form.location} placeholder="e.g. Radhavallabh Temple · Vrindavan Dham" onChange={e => setForm({ ...form, location: e.target.value })} />
+            </Field>
+            <Field label="Display Sequence (Order)">
+              <Inp type="number" value={form.order} placeholder="1 = First post shown on top" onChange={e => setForm({ ...form, order: e.target.value })} />
+            </Field>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <Field label="Media Type">
+              <select
+                value={form.mediaType}
+                onChange={e => setForm({ ...form, mediaType: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(212,175,55,0.3)',
+                  backgroundColor: '#16161e',
+                  color: '#fff',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '0.9rem',
+                }}
+              >
+                <option value="image">📷 Photo / Image</option>
+                <option value="video">🎥 Reel / Video</option>
+              </select>
+            </Field>
+            <Field label="Initial Likes Count">
+              <Inp type="number" value={form.likes} onChange={e => setForm({ ...form, likes: e.target.value })} />
+            </Field>
+          </div>
+          <Field label="Upload File (Image or MP4 Video)">
+            <input
+              type="file"
+              accept="image/*,video/*"
+              onChange={e => setMediaFile(e.target.files[0])}
+              style={{ color: '#fff', fontFamily: 'var(--font-body)', fontSize: '0.85rem' }}
+            />
+          </Field>
+          <Field label="Or Direct Media URL (Optional)">
+            <Inp value={form.mediaUrl} placeholder="e.g. /hero-animation/hero-1.mp4 or https://..." onChange={e => setForm({ ...form, mediaUrl: e.target.value })} />
+          </Field>
         </FormCard>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-        {posts.map(p => (
-          <div key={p.id} style={{ borderRadius: '14px', overflow: 'hidden', border, background: surfaceAlt }}>
-            {p.image && (
-              <img src={p.image.startsWith('/uploads') ? `${API_BASE}${p.image}` : p.image}
-                alt={p.title} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
-            )}
-            <div style={{ padding: '14px' }}>
-              <div style={{ fontFamily: 'var(--font-heading)', color: gold, marginBottom: '6px' }}>{p.title}</div>
-              <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginBottom: '12px' }}>{p.description?.slice(0, 60)}...</div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <Btn size="sm" variant="ghost" onClick={() => openEdit(p)}>Edit</Btn>
-                <Btn size="sm" variant="danger" onClick={() => del(p.id)}>Delete</Btn>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '22px' }}>
+        {posts.map(p => {
+          const isVideo = p.mediaType === 'video' || p.image?.endsWith('.mp4') || p.mediaUrl?.endsWith('.mp4');
+          const src = p.mediaUrl || p.image;
+          const fullSrc = src?.startsWith('/uploads') ? `${API_BASE}${src}` : src;
+
+          return (
+            <div key={p.id} style={{ borderRadius: '16px', overflow: 'hidden', border, background: surfaceAlt, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ position: 'relative', width: '100%', height: '180px', backgroundColor: '#000', overflow: 'hidden' }}>
+                {isVideo ? (
+                  <video src={fullSrc} muted playsInline autoPlay loop style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : src ? (
+                  <img src={fullSrc} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>
+                    🕉️
+                  </div>
+                )}
+                {/* Badges */}
+                <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
+                  <span style={{ backgroundColor: 'rgba(0,0,0,0.7)', color: gold, fontSize: '0.72rem', padding: '3px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                    Order #{p.order || 1}
+                  </span>
+                  <span style={{ backgroundColor: isVideo ? 'rgba(236,72,153,0.85)' : 'rgba(59,130,246,0.85)', color: '#fff', fontSize: '0.72rem', padding: '3px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                    {isVideo ? '🎥 Reel' : '📷 Photo'}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ padding: '16px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontFamily: 'var(--font-heading)', color: gold, fontSize: '0.98rem', marginBottom: '6px', fontWeight: 700, lineHeight: 1.3 }}>
+                  {p.title || 'Untitled Post'}
+                </div>
+                <div style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', marginBottom: '8px' }}>
+                  📍 {p.location || 'Vrindavan Dham'} · ❤️ {p.likes?.toLocaleString('en-IN') || 0} likes
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.65)', marginBottom: '16px', flexGrow: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {p.description || 'No caption'}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <Btn size="sm" variant="ghost" onClick={() => openEdit(p)}>Edit</Btn>
+                  <Btn size="sm" variant="danger" onClick={() => del(p.id)}>Delete</Btn>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
+
 
 // ─── Puja Manager ─────────────────────────────────────────────────────────────
 function PujaManager({ token }) {
@@ -436,6 +562,201 @@ function ShopManager({ token }) {
   );
 }
 
+// ─── Reviews Tab ─────────────────────────────────────────────────────────────
+function ReviewsManager({ token }) {
+  const [reviews, setReviews] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ userName: '', city: '', rating: 5, text: '', isFeatured: false, isApproved: true });
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const load = () => {
+    fetch(`${API_BASE}/api/admin/reviews`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setReviews(d.data || []))
+      .catch(() => {});
+  };
+
+  useEffect(() => { load(); }, [token]);
+
+  const featuredCount = reviews.filter(r => r.isFeatured && r.isApproved).length;
+
+  const openAdd = () => {
+    setEditing(null);
+    setForm({ userName: '', city: 'India', rating: 5, text: '', isFeatured: featuredCount < 5, isApproved: true });
+    setErrorMsg('');
+    setShowForm(true);
+  };
+
+  const openEdit = (r) => {
+    setEditing(r);
+    setForm({
+      userName: r.userName || '',
+      city: r.city || '',
+      rating: r.rating || 5,
+      text: r.text || '',
+      isFeatured: !!r.isFeatured,
+      isApproved: r.isApproved !== undefined ? r.isApproved : true
+    });
+    setErrorMsg('');
+    setShowForm(true);
+  };
+
+  const save = async () => {
+    setErrorMsg('');
+    if (!form.userName.trim() || !form.text.trim()) {
+      setErrorMsg('Name and review content are required.');
+      return;
+    }
+    const url = editing ? `${API_BASE}/api/admin/reviews/${editing.id}` : `${API_BASE}/api/admin/reviews`;
+    const method = editing ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      setErrorMsg(result.error || 'Failed to save review.');
+      return;
+    }
+    setShowForm(false);
+    load();
+  };
+
+  const toggleFeatured = async (r) => {
+    const willBeFeatured = !r.isFeatured;
+    if (willBeFeatured && featuredCount >= 5) {
+      alert('Only 5 reviews can be featured on the homepage at a time. Please unpin an existing featured review first.');
+      return;
+    }
+    await fetch(`${API_BASE}/api/admin/reviews/${r.id}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isFeatured: willBeFeatured, isApproved: true })
+    });
+    load();
+  };
+
+  const toggleApproved = async (r) => {
+    const willBeApproved = !r.isApproved;
+    await fetch(`${API_BASE}/api/admin/reviews/${r.id}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isApproved: willBeApproved, isFeatured: willBeApproved ? r.isFeatured : false })
+    });
+    load();
+  };
+
+  const del = async (id) => {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+    await fetch(`${API_BASE}/api/admin/reviews/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    load();
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h2 style={sectionTitle}>User Reviews ({reviews.length})</h2>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            marginTop: '6px', padding: '4px 12px', borderRadius: '12px',
+            backgroundColor: featuredCount === 5 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(212, 175, 55, 0.15)',
+            border: `1px solid ${featuredCount === 5 ? '#22c55e' : gold}`,
+            fontSize: '0.82rem', color: featuredCount === 5 ? '#22c55e' : gold, fontWeight: 700
+          }}>
+            <span>📌 Pinned on Homepage: {featuredCount} / 5</span>
+            {featuredCount === 5 && <span>(Max limit active)</span>}
+          </div>
+        </div>
+        <Btn onClick={openAdd}>+ Add Review</Btn>
+      </div>
+
+      {showForm && (
+        <FormCard title={editing ? 'Edit Review' : 'New Review'} onClose={() => setShowForm(false)} onSave={save}>
+          {errorMsg && (
+            <div style={{ padding: '8px 12px', borderRadius: '8px', background: 'rgba(255,80,80,0.15)', border: '1px solid rgba(255,80,80,0.3)', color: '#ff6b6b', fontSize: '0.82rem', marginBottom: '16px' }}>
+              {errorMsg}
+            </div>
+          )}
+          <Field label="Author Name"><Inp value={form.userName} onChange={e => setForm({ ...form, userName: e.target.value })} placeholder="e.g. Priya Sharma" /></Field>
+          <Field label="City / Location"><Inp value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="e.g. Delhi, Vrindavan" /></Field>
+          <Field label="Rating (1 to 5 Stars)">
+            <select
+              value={form.rating}
+              onChange={e => setForm({ ...form, rating: Number(e.target.value) })}
+              style={{ ...inputStyle, color: gold, fontWeight: 700 }}
+            >
+              <option value="5">★★★★★ (5 Stars)</option>
+              <option value="4">★★★★☆ (4 Stars)</option>
+              <option value="3">★★★☆☆ (3 Stars)</option>
+              <option value="2">★★☆☆☆ (2 Stars)</option>
+              <option value="1">★☆☆☆☆ (1 Star)</option>
+            </select>
+          </Field>
+          <Field label="Review Content"><Textarea value={form.text} onChange={e => setForm({ ...form, text: e.target.value })} placeholder="Write review testimonial..." /></Field>
+          
+          <div style={{ display: 'flex', gap: '24px', marginTop: '12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#fff', fontSize: '0.85rem' }}>
+              <input
+                type="checkbox"
+                checked={form.isFeatured}
+                onChange={e => setForm({ ...form, isFeatured: e.target.checked })}
+              />
+              <span>📌 Pin to Homepage (Max 5)</span>
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#fff', fontSize: '0.85rem' }}>
+              <input
+                type="checkbox"
+                checked={form.isApproved}
+                onChange={e => setForm({ ...form, isApproved: e.target.checked })}
+              />
+              <span>✓ Approved</span>
+            </label>
+          </div>
+        </FormCard>
+      )}
+
+      <Table
+        cols={['Author', 'Rating', 'Review Content', 'Status', 'Homepage Pin', 'Actions']}
+        rows={reviews.map(r => [
+          <div key="author">
+            <div style={{ fontWeight: 700, color: '#fff' }}>{r.userName}</div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)' }}>{r.city || 'India'}</div>
+          </div>,
+          <span key="rating" style={{ color: gold, fontSize: '0.9rem' }}>
+            {'★'.repeat(r.rating || 5)}{'☆'.repeat(Math.max(0, 5 - (r.rating || 5)))}
+          </span>,
+          <div key="text" style={{ maxWidth: '300px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.4 }}>
+            {r.text}
+          </div>,
+          <Btn key="approved" size="sm" variant="ghost" onClick={() => toggleApproved(r)} style={{
+            color: r.isApproved ? '#22c55e' : '#ff6b6b',
+            borderColor: r.isApproved ? 'rgba(34,197,94,0.4)' : 'rgba(255,80,80,0.4)'
+          }}>
+            {r.isApproved ? '✓ Approved' : '⏳ Pending'}
+          </Btn>,
+          <Btn key="featured" size="sm" variant="ghost" onClick={() => toggleFeatured(r)} style={{
+            color: r.isFeatured ? gold : 'rgba(255,255,255,0.4)',
+            borderColor: r.isFeatured ? gold : 'rgba(255,255,255,0.15)',
+            background: r.isFeatured ? 'rgba(212,175,55,0.15)' : 'transparent'
+          }}>
+            {r.isFeatured ? '⭐ Pinned (Active)' : '+ Pin to Home'}
+          </Btn>,
+          <div key="actions" style={{ display: 'flex', gap: '6px' }}>
+            <Btn size="sm" variant="ghost" onClick={() => openEdit(r)}>Edit</Btn>
+            <Btn size="sm" variant="danger" onClick={() => del(r.id)}>Delete</Btn>
+          </div>
+        ])}
+      />
+    </div>
+  );
+}
+
 // ─── Users Tab ────────────────────────────────────────────────────────────────
 function UsersManager({ token }) {
   const [users, setUsers] = useState([]);
@@ -654,6 +975,7 @@ export default function AdminPanel({ setCurrentPage }) {
     users: <UsersManager token={token} />,
     reports: <ReportsManager token={token} />,
     bookings: <BookingsManager token={token} />,
+    reviews: <ReviewsManager token={token} />,
     gallery: <GalleryManager token={token} />,
     pujas: <PujaManager token={token} />,
     courses: <CoursesManager token={token} />,
@@ -665,6 +987,7 @@ export default function AdminPanel({ setCurrentPage }) {
     { id: 'users', label: '👥 Users & Kundlis' },
     { id: 'reports', label: '📜 Generated Kundlis' },
     { id: 'bookings', label: '📅 Bookings' },
+    { id: 'reviews', label: '⭐ Reviews (Homepage 5)' },
     { id: 'gallery', label: '🖼️ Gallery' },
     { id: 'pujas', label: '🪔 Pujas' },
     { id: 'courses', label: '📚 Courses' },

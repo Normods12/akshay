@@ -32,3 +32,8 @@ server/.env.*
 # Large binaries and uploads
 vs_buildtools.exe
 public/uploads/
+
+# Deployment scripts with server credentials & scratch files
+deploy_vps*
+scratch/
+*.xlsx

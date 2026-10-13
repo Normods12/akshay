@@ -220,10 +220,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB for short reels/videos
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) cb(null, true);
-    else cb(new Error('Only image files are allowed'));
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) cb(null, true);
+    else cb(new Error('Only image and video files are allowed'));
   }
 });
 
@@ -426,35 +426,95 @@ app.get('/api/panchang/today', async (req, res) => {
 // ─── Gallery Routes ───────────────────────────────────────────────────────────
 app.get('/api/gallery', (req, res) => {
   const gallery = readData('gallery.json');
-  res.json({ success: true, data: gallery });
+  // "the one posted first should appear on first"
+  // If post has explicit order, sort by order; otherwise by createdAt ascending (earliest first)
+  const sorted = [...gallery].sort((a, b) => {
+    if (a.order !== undefined && b.order !== undefined && a.order !== null && b.order !== null) {
+      return Number(a.order) - Number(b.order);
+    }
+    return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+  });
+  res.json({ success: true, data: sorted });
 });
 
-app.post('/api/gallery', verifyToken, requireAdmin, upload.single('image'), (req, res) => {
+app.post('/api/gallery', verifyToken, requireAdmin, upload.single('media'), (req, res) => {
   const gallery = readData('gallery.json');
-  const { title, description } = req.body;
+  const { title, description, location, mediaType, videoUrl, mediaUrl, likes, order } = req.body;
+  
+  let detectedType = mediaType || 'image';
+  let mediaPath = '';
+
+  if (req.file) {
+    mediaPath = `/uploads/${req.file.filename}`;
+    if (req.file.mimetype.startsWith('video/')) {
+      detectedType = 'video';
+    }
+  } else if (mediaUrl) {
+    mediaPath = mediaUrl;
+  } else if (req.body.image) {
+    mediaPath = req.body.image;
+  } else if (videoUrl) {
+    mediaPath = videoUrl;
+    detectedType = 'video';
+  }
+
+  // Also check extension if mediaPath has mp4/webm/mov
+  if (mediaPath && (mediaPath.endsWith('.mp4') || mediaPath.endsWith('.webm') || mediaPath.endsWith('.mov'))) {
+    detectedType = 'video';
+  }
+
   const newPost = {
     id: uuidv4(),
-    title: title || 'Untitled',
+    title: title || '',
     description: description || '',
-    image: req.file ? `/uploads/${req.file.filename}` : '',
+    location: location || 'Vrindavan Dham · Radhavallabh Temple',
+    mediaType: detectedType,
+    mediaUrl: mediaPath,
+    image: mediaPath, // backward compatibility
+    likes: req.body.likes !== undefined && req.body.likes !== '' ? Number(likes) : Math.floor(Math.random() * 500) + 750,
+    order: order !== undefined && order !== '' ? Number(order) : (gallery.length > 0 ? Math.max(...gallery.map(g => Number(g.order || 0))) + 1 : 1),
     createdAt: new Date().toISOString(),
   };
-  gallery.unshift(newPost);
+
+  gallery.push(newPost);
   writeData('gallery.json', gallery);
   res.json({ success: true, data: newPost });
 });
 
-app.put('/api/gallery/:id', verifyToken, requireAdmin, upload.single('image'), (req, res) => {
+app.put('/api/gallery/:id', verifyToken, requireAdmin, upload.single('media'), (req, res) => {
   const gallery = readData('gallery.json');
   const idx = gallery.findIndex(g => g.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
+
+  let mediaPath = gallery[idx].mediaUrl || gallery[idx].image;
+  let detectedType = req.body.mediaType || gallery[idx].mediaType || 'image';
+
+  if (req.file) {
+    mediaPath = `/uploads/${req.file.filename}`;
+    detectedType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+  } else if (req.body.mediaUrl) {
+    mediaPath = req.body.mediaUrl;
+  } else if (req.body.image) {
+    mediaPath = req.body.image;
+  }
+
+  if (mediaPath && (mediaPath.endsWith('.mp4') || mediaPath.endsWith('.webm') || mediaPath.endsWith('.mov'))) {
+    detectedType = 'video';
+  }
+
   gallery[idx] = {
     ...gallery[idx],
-    title: req.body.title || gallery[idx].title,
+    title: req.body.title !== undefined ? req.body.title : gallery[idx].title,
     description: req.body.description !== undefined ? req.body.description : gallery[idx].description,
-    image: req.file ? `/uploads/${req.file.filename}` : gallery[idx].image,
+    location: req.body.location !== undefined ? req.body.location : gallery[idx].location,
+    mediaType: detectedType,
+    mediaUrl: mediaPath,
+    image: mediaPath,
+    likes: req.body.likes !== undefined && req.body.likes !== '' ? Number(req.body.likes) : gallery[idx].likes,
+    order: req.body.order !== undefined && req.body.order !== '' ? Number(req.body.order) : gallery[idx].order,
     updatedAt: new Date().toISOString(),
   };
+
   writeData('gallery.json', gallery);
   res.json({ success: true, data: gallery[idx] });
 });
@@ -574,6 +634,94 @@ app.put('/api/admin/shop/:id', verifyToken, requireAdmin, upload.single('image')
 app.delete('/api/admin/shop/:id', verifyToken, requireAdmin, (req, res) => {
   const shop = readData('shop.json');
   writeData('shop.json', shop.filter(s => s.id !== req.params.id));
+  res.json({ success: true });
+});
+
+// ─── Reviews API ─────────────────────────────────────────────────────────────
+// Public: get up to 5 featured reviews for homepage
+app.get('/api/reviews/featured', (req, res) => {
+  const reviews = readData('reviews.json');
+  const featured = reviews.filter(r => r.isFeatured && r.isApproved).slice(0, 5);
+  res.json({ success: true, data: featured });
+});
+
+// Authenticated user submits a review
+app.post('/api/reviews', verifyToken, (req, res) => {
+  const { rating, text, city } = req.body;
+  if (!text || !text.trim()) {
+    return res.status(400).json({ error: 'Review text is required.' });
+  }
+  const reviews = readData('reviews.json');
+  const newReview = {
+    id: uuidv4(),
+    userId: req.user.id || '',
+    userName: req.user.name || 'Seeker',
+    userEmail: req.user.email || '',
+    userPicture: req.user.picture || '',
+    rating: Math.max(1, Math.min(5, Number(rating) || 5)),
+    city: city ? city.trim() : 'India',
+    text: text.trim(),
+    isApproved: true,
+    isFeatured: false,
+    createdAt: new Date().toISOString()
+  };
+  reviews.unshift(newReview);
+  writeData('reviews.json', reviews);
+  res.json({ success: true, data: newReview });
+});
+
+// Admin: Get all reviews
+app.get('/api/admin/reviews', verifyToken, requireAdmin, (req, res) => {
+  const reviews = readData('reviews.json');
+  res.json({ success: true, data: reviews });
+});
+
+// Admin: Create custom review
+app.post('/api/admin/reviews', verifyToken, requireAdmin, (req, res) => {
+  const { userName, rating, text, city, isFeatured, isApproved } = req.body;
+  const reviews = readData('reviews.json');
+  const newReview = {
+    id: uuidv4(),
+    userName: userName || 'Seeker',
+    city: city || 'India',
+    rating: Math.max(1, Math.min(5, Number(rating) || 5)),
+    text: (text || '').trim(),
+    isApproved: isApproved !== undefined ? isApproved : true,
+    isFeatured: isFeatured || false,
+    createdAt: new Date().toISOString()
+  };
+  reviews.unshift(newReview);
+  writeData('reviews.json', reviews);
+  res.json({ success: true, data: newReview });
+});
+
+// Admin: Update review (approve/unapprove, toggle featured, edit)
+app.put('/api/admin/reviews/:id', verifyToken, requireAdmin, (req, res) => {
+  const reviews = readData('reviews.json');
+  const idx = reviews.findIndex(r => r.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Review not found' });
+
+  // If setting isFeatured to true, ensure max 5 featured reviews
+  if (req.body.isFeatured === true) {
+    const featuredCount = reviews.filter(r => r.id !== req.params.id && r.isFeatured).length;
+    if (featuredCount >= 5) {
+      return res.status(400).json({ error: 'Maximum 5 reviews can be featured on the homepage. Please unpin another review first.' });
+    }
+  }
+
+  reviews[idx] = {
+    ...reviews[idx],
+    ...req.body,
+    updatedAt: new Date().toISOString()
+  };
+  writeData('reviews.json', reviews);
+  res.json({ success: true, data: reviews[idx] });
+});
+
+// Admin: Delete review
+app.delete('/api/admin/reviews/:id', verifyToken, requireAdmin, (req, res) => {
+  const reviews = readData('reviews.json');
+  writeData('reviews.json', reviews.filter(r => r.id !== req.params.id));
   res.json({ success: true });
 });
 
@@ -887,6 +1035,483 @@ app.post('/api/bookings', async (req, res) => {
   }
 });
 
+// ─── Demo Class Booking Endpoint ──────────────────────────────────────────────
+app.post('/api/demo-booking', async (req, res) => {
+  try {
+    const { name, email, phone, courseTitle, notes, eventDate } = req.body;
+    if (!name || !email || !phone) {
+      return res.status(400).json({ error: 'Name, email, and phone number are required.' });
+    }
+
+    const bookings = readData('bookings.json');
+    const newDemoBooking = {
+      id: uuidv4(),
+      type: 'demo_class',
+      title: `Live Demo Class: ${courseTitle || 'Vedic Astrology'}`,
+      service: courseTitle || 'Foundation of Jyotish',
+      name,
+      email,
+      phone,
+      notes: notes || '',
+      date: eventDate || '1st of Upcoming Month',
+      time: '07:00 PM IST',
+      status: 'confirmed',
+      createdAt: new Date().toISOString()
+    };
+
+    bookings.unshift(newDemoBooking);
+    writeData('bookings.json', bookings);
+
+    // Send emails via Resend
+    try {
+      // 1. Alert email to Acharya Ji
+      await resend.emails.send({
+        from: 'Mannjyotish Academy <onboarding@resend.dev>',
+        to: ['goswamiashay000@gmail.com'],
+        subject: `🎓 New Demo Class Registration: ${name} (${newDemoBooking.date})`,
+        html: `
+          <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; border: 1px solid #e0c878; border-radius: 12px; background: #fffdf7;">
+            <h2 style="color: #b8860b; border-bottom: 2px solid #b8860b; padding-bottom: 8px;">🎓 New Live Demo Class Enrollment</h2>
+            <p><strong>Student Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>WhatsApp / Phone:</strong> ${phone}</p>
+            <p><strong>Course of Interest:</strong> ${courseTitle || 'Foundation of Jyotish'}</p>
+            <p><strong>Batch Schedule:</strong> ${newDemoBooking.date} at 7:00 PM IST</p>
+            ${notes ? `<p><strong>Student Question / Notes:</strong> ${notes}</p>` : ''}
+            <p style="margin-top: 20px; font-size: 0.85em; color: #888;">MannJyotish Academy Automated Notification</p>
+          </div>
+        `
+      });
+
+      // 2. Confirmation email to the User
+      await resend.emails.send({
+        from: 'Mannjyotish Academy <onboarding@resend.dev>',
+        to: [email],
+        subject: `🕉️ Your Demo Class Seat is Reserved: ${newDemoBooking.date} at 7:00 PM IST`,
+        html: `
+          <div style="font-family: sans-serif; padding: 24px; color: #333; max-width: 600px; border: 1px solid #d4af37; border-radius: 14px; background: #fffefb;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h1 style="color: #b8860b; margin: 0; font-size: 24px;">MannJyotish Academy</h1>
+              <p style="color: #666; font-size: 14px; margin: 4px 0;">Institute of Vedic Sciences & Astrology · Vrindavan Lineage</p>
+            </div>
+            <p>Namaste <strong>${name}</strong>,</p>
+            <p>Congratulations! Your seat for the <strong>Live Vedic Astrology Demo Class</strong> has been reserved.</p>
+            <div style="background: #fbf7ec; border-left: 4px solid #b8860b; padding: 14px 18px; margin: 20px 0; border-radius: 4px;">
+              <p style="margin: 4px 0;"><strong>📚 Course:</strong> ${courseTitle || 'Foundation of Jyotish'}</p>
+              <p style="margin: 4px 0;"><strong>🗓️ Date:</strong> ${newDemoBooking.date}</p>
+              <p style="margin: 4px 0;"><strong>🕖 Time:</strong> 7:00 PM IST</p>
+              <p style="margin: 4px 0;"><strong>🎙️ Mentor:</strong> Acharya Shri Hit Ashay Krishn Goswami</p>
+            </div>
+            <p>You will receive the private session link and study materials on your WhatsApp (<strong>${phone}</strong>) prior to the class.</p>
+            <p style="margin-top: 24px;">Blessings and regards,<br><strong>Acharya Shri Hit Ashay Krishn Goswami</strong><br>MannJyotish Academy</p>
+          </div>
+        `
+      });
+    } catch (mailErr) {
+      console.error('Demo booking Resend mail warning:', mailErr);
+    }
+
+    res.json({ success: true, booking: newDemoBooking });
+  } catch (err) {
+    console.error('Demo booking error:', err);
+    res.status(500).json({ error: 'Failed to reserve demo class.' });
+  }
+});
+
+// ─── WhatsApp Cloud API Webhooks ──────────────────────────────────────────────
+// 1. GET verification endpoint (Meta dashboard verifies Callback URL & Token)
+app.get('/api/webhook/whatsapp', (req, res) => {
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'mannjyotish_wa_secret_2026';
+
+  if (mode && token) {
+    if (mode === 'subscribe' && token === WHATSAPP_VERIFY_TOKEN) {
+      console.log('✓ WhatsApp Webhook verified successfully by Meta!');
+      return res.status(200).send(challenge);
+    } else {
+      console.warn('WhatsApp verification failed: token mismatch');
+      return res.sendStatus(403);
+    }
+  }
+  return res.sendStatus(400);
+});
+
+const { sendWhatsAppMessage, handleIncomingWhatsAppInteraction } = require('./src/whatsappBot');
+
+// 2. POST webhook event handler (Meta delivers incoming messages and status updates)
+app.post('/api/webhook/whatsapp', async (req, res) => {
+  const body = req.body;
+  if (body.object) {
+    // Respond with 200 OK within 3 seconds as required by Meta
+    res.status(200).send('EVENT_RECEIVED');
+
+    try {
+      if (
+        body.entry &&
+        body.entry[0]?.changes &&
+        body.entry[0]?.changes[0]?.value?.messages &&
+        body.entry[0]?.changes[0]?.value?.messages[0]
+      ) {
+        const msg = body.entry[0].changes[0].value.messages[0];
+        const contact = body.entry[0].changes[0].value.contacts?.[0];
+        const from = msg.from; // User's WhatsApp number
+        const senderName = contact?.profile?.name || '';
+
+        let userChoice = '';
+        if (msg.type === 'interactive') {
+          if (msg.interactive?.type === 'button_reply') {
+            userChoice = msg.interactive.button_reply.id || msg.interactive.button_reply.title || '';
+          } else if (msg.interactive?.type === 'list_reply') {
+            userChoice = msg.interactive.list_reply.id || msg.interactive.list_reply.title || '';
+          }
+        } else if (msg.type === 'text') {
+          userChoice = msg.text?.body || '';
+        }
+
+        console.log(`[WhatsApp Incoming] From: ${from} (${senderName}) | Type: ${msg.type} | Input: ${userChoice}`);
+
+        // Generate and send interactive button or list reply
+        const botReply = handleIncomingWhatsAppInteraction(userChoice, from, senderName);
+        await sendWhatsAppMessage(from, botReply);
+      }
+    } catch (e) {
+      console.error('Error handling WhatsApp message event:', e);
+    }
+  } else {
+    res.sendStatus(404);
+  }
+});
+
+// ─── Baileys Direct WhatsApp Bot (Zero-Card QR Connect) ──────────────────────
+let baileysBotModule = null;
+try {
+  baileysBotModule = require('./src/baileysBot');
+  baileysBotModule.startBaileysBot();
+  console.log('✓ Baileys WhatsApp Bot module loaded and initialized.');
+} catch (bErr) {
+  console.warn('Baileys bot initialization warning (run npm install if needed):', bErr.message);
+}
+
+app.get('/api/whatsapp/status', (req, res) => {
+  if (!baileysBotModule) {
+    return res.json({ status: 'not_installed', error: 'Baileys not loaded' });
+  }
+  res.json(baileysBotModule.getBotState());
+});
+
+// ─── Chit Fund Reminder Endpoints ────────────────────────────────────────────
+app.get('/api/chitfund/preview', (req, res) => {
+  try {
+    const { parseChitFundData } = require('./src/chitFundReminder');
+    const data = parseChitFundData();
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/chitfund/send-reminders', async (req, res) => {
+  try {
+    const { sendReminders } = require('./src/sendChitReminders');
+    const limit = parseInt(req.body.limit, 10) || 2;
+    const results = await sendReminders(limit);
+    res.json({ success: true, count: results.length, data: results });
+  } catch (err) {
+    console.error('Chit fund reminder API error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/whatsapp/logout', async (req, res) => {
+  if (!baileysBotModule) {
+    return res.json({ success: false });
+  }
+  const result = await baileysBotModule.logoutBot();
+  res.json(result);
+});
+
+// User-friendly QR code linking page
+app.get(['/whatsapp-scan', '/api/whatsapp/scan'], (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect WhatsApp Bot | MannJyotish</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at top, #141b2d 0%, #080c14 100%);
+      color: #f3f4f6;
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(18, 24, 38, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(212, 175, 55, 0.15);
+      max-width: 480px;
+      width: 100%;
+      padding: 36px 28px;
+      text-align: center;
+      position: relative;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(212, 175, 55, 0.15);
+      color: #e5c158;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 26px;
+      color: #f7e7b4;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    p.subtitle {
+      color: #9ca3af;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .qr-container {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 16px;
+      display: inline-block;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      margin-bottom: 20px;
+      position: relative;
+      min-width: 260px;
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-image {
+      width: 240px;
+      height: 240px;
+      display: block;
+      border-radius: 8px;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .status-connecting {
+      background: rgba(234, 179, 8, 0.15);
+      color: #facc15;
+      border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+    .status-connecting .status-dot {
+      background: #facc15;
+      box-shadow: 0 0 8px #facc15;
+      animation: pulse 1.5s infinite;
+    }
+    .status-ready {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .status-ready .status-dot {
+      background: #60a5fa;
+      box-shadow: 0 0 8px #60a5fa;
+      animation: pulse 1.5s infinite;
+    }
+    .status-connected {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .status-connected .status-dot {
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80;
+    }
+    .instructions {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: left;
+      font-size: 13px;
+      color: #d1d5db;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .instructions ol {
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin-bottom: 6px;
+    }
+    .instructions strong {
+      color: #f7e7b4;
+    }
+    .btn-logout {
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .spinner {
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border-left-color: #b8860b;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">🕉️ MannJyotish WhatsApp Service</div>
+    <h1>Connect WhatsApp Bot</h1>
+    <p class="subtitle">Link your WhatsApp number to activate the automated Vedic Astrology menu assistant.</p>
+
+    <div id="statusPill" class="status-pill status-connecting">
+      <span class="status-dot"></span>
+      <span id="statusText">Checking WhatsApp connection...</span>
+    </div>
+
+    <div class="qr-container" id="qrWrapper">
+      <div class="spinner" id="loadingSpinner"></div>
+      <img id="qrImg" class="qr-image" style="display:none;" alt="Scan WhatsApp QR" />
+      <div id="connectedView" style="display:none; color: #15803d; text-align: center; padding: 20px;">
+        <div style="font-size: 54px; margin-bottom: 12px;">✅</div>
+        <h3 style="font-size: 20px; font-weight: 700; color: #166534; margin-bottom: 4px;">WhatsApp Bot Active!</h3>
+        <p id="userPhone" style="font-size: 14px; color: #374151; font-weight: 600;"></p>
+        <p style="font-size: 12px; color: #4b5563; margin-top: 6px;">The bot is live and responding to incoming messages.</p>
+      </div>
+    </div>
+
+    <div class="instructions" id="instructionsBox">
+      <ol>
+        <li>Open <strong>WhatsApp</strong> on your mobile phone.</li>
+        <li>Tap <strong>Menu (⋮)</strong> or <strong>Settings</strong> ⚙️.</li>
+        <li>Tap <strong>Linked Devices</strong>.</li>
+        <li>Tap <strong>Link a Device</strong> and point your camera at this QR code.</li>
+      </ol>
+    </div>
+
+    <div id="logoutSection" style="display:none;">
+      <button class="btn-logout" onclick="disconnectDevice()">Disconnect / Unlink Number</button>
+    </div>
+  </div>
+
+  <script>
+    let pollInterval = null;
+
+    async function checkStatus() {
+      try {
+        const res = await fetch('/api/whatsapp/status');
+        const data = await res.json();
+
+        const pill = document.getElementById('statusPill');
+        const statusText = document.getElementById('statusText');
+        const spinner = document.getElementById('loadingSpinner');
+        const qrImg = document.getElementById('qrImg');
+        const connectedView = document.getElementById('connectedView');
+        const instructions = document.getElementById('instructionsBox');
+        const logoutSec = document.getElementById('logoutSection');
+
+        if (data.status === 'connected') {
+          pill.className = 'status-pill status-connected';
+          statusText.textContent = 'Active & Connected';
+          spinner.style.display = 'none';
+          qrImg.style.display = 'none';
+          connectedView.style.display = 'block';
+          instructions.style.display = 'none';
+          logoutSec.style.display = 'block';
+          document.getElementById('userPhone').textContent = data.user?.id ? 'Linked: ' + data.user.id.split(':')[0] : 'Device Linked';
+        } else if (data.status === 'qr_ready' && data.qr) {
+          pill.className = 'status-pill status-ready';
+          statusText.textContent = 'Scan QR Code with WhatsApp';
+          spinner.style.display = 'none';
+          qrImg.src = data.qr;
+          qrImg.style.display = 'block';
+          connectedView.style.display = 'none';
+          instructions.style.display = 'block';
+          logoutSec.style.display = 'none';
+        } else {
+          pill.className = 'status-pill status-connecting';
+          statusText.textContent = 'Preparing QR code...';
+          spinner.style.display = 'block';
+          qrImg.style.display = 'none';
+          connectedView.style.display = 'none';
+          instructions.style.display = 'block';
+          logoutSec.style.display = 'none';
+        }
+      } catch (e) {
+        console.error('Polling error:', e);
+      }
+    }
+
+    async function disconnectDevice() {
+      if (!confirm('Are you sure you want to unlink this WhatsApp account?')) return;
+      try {
+        await fetch('/api/whatsapp/logout', { method: 'POST' });
+        checkStatus();
+      } catch (e) {
+        alert('Failed to disconnect');
+      }
+    }
+
+    checkStatus();
+    pollInterval = setInterval(checkStatus, 2500);
+  </script>
+</body>
+</html>`);
+});
+
+
 // ─── Courses Endpoints ────────────────────────────────────────────────────────
 app.get('/api/courses', (req, res) => {
   const courses = readData('courses.json');
@@ -1033,6 +1658,102 @@ app.delete('/api/admin/bookings/:id', verifyToken, requireAdmin, (req, res) => {
   const filtered = bookings.filter(b => b.id !== req.params.id);
   writeData('bookings.json', filtered);
   res.json({ success: true });
+});
+
+// ─── DMR Chit Fund Local-First Management & Mock API Engine ──────────────────
+const {
+  parseChitFundData,
+  buildReminderMessage,
+  executeDispatch,
+  getDispatchHistory,
+  saveActiveExcelBuffer,
+  resetToSampleExcel
+} = require('./src/chitFundReminder');
+
+const uploadExcel = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  fileFilter: (req, file, cb) => {
+    if (file.originalname.match(/\.(xlsx|xls|csv)$/i)) cb(null, true);
+    else cb(new Error('Only Excel (.xlsx, .xls) or CSV files are allowed'));
+  }
+});
+
+// 1. Get parsed data (Config, Subscribers with Paid/Pending Status, Summary Stats)
+app.get('/api/chitfund/data', (req, res) => {
+  try {
+    const data = parseChitFundData();
+    res.json({ success: true, ...data });
+  } catch (err) {
+    console.error('[ChitFund API Error]:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 2. Upload and parse new monthly Excel sheet
+app.post('/api/chitfund/upload', uploadExcel.single('file'), (req, res) => {
+  try {
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ success: false, error: 'No Excel file uploaded.' });
+    }
+    const data = saveActiveExcelBuffer(req.file.buffer);
+    res.json({
+      success: true,
+      message: `Successfully loaded "${req.file.originalname}" (${data.subscribers.length} subscribers found)`,
+      fileName: req.file.originalname,
+      ...data
+    });
+  } catch (err) {
+    console.error('[ChitFund Upload Error]:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 3. Reset back to original sample data
+app.post('/api/chitfund/reset', (req, res) => {
+  try {
+    const data = resetToSampleExcel();
+    res.json({ success: true, message: 'Reset to default sample Excel sheet', ...data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4. Preview personalized WhatsApp reminder payload
+app.post('/api/chitfund/preview', (req, res) => {
+  try {
+    const { subscriber, config } = req.body;
+    if (!subscriber) return res.status(400).json({ success: false, error: 'Subscriber details required' });
+    const rendered = buildReminderMessage(subscriber, config || { fundName: 'DMR CHIT FUND PVT LTD', batch: 'DST1C - 25 LAKHS', psoNumber: 'MM270826P567' });
+    res.json({ success: true, rendered });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 5. Fire reminders via Mock BSP API (or live channels)
+app.post('/api/chitfund/dispatch', async (req, res) => {
+  try {
+    const { subscriberIds, mode = 'mock', delayMs = 300 } = req.body;
+    if (!subscriberIds || !Array.isArray(subscriberIds) || subscriberIds.length === 0) {
+      return res.status(400).json({ success: false, error: 'No subscriber IDs provided for dispatch.' });
+    }
+    const result = await executeDispatch({ subscriberIds, mode, delayMs });
+    res.json(result);
+  } catch (err) {
+    console.error('[ChitFund Dispatch Error]:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6. Get dispatch history
+app.get('/api/chitfund/history', (req, res) => {
+  try {
+    const history = getDispatchHistory();
+    res.json({ success: true, history });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────

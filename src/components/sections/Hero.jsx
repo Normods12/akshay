@@ -2,16 +2,97 @@ import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import VedicButton from '../ui/VedicButton';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import CosmicStarfield from '../ui/CosmicStarfield';
 import SolarSystem3D from '../ui/SolarSystem3D';
 import MandalaArt from '../ui/MandalaArt';
 import LoginModal from '../auth/LoginModal';
 
-const Hero = ({ setCurrentPage }) => {
+const Hero = ({ setCurrentPage, onVideoLoaded }) => {
   const theme = useTheme();
   const { isLoggedIn } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const videoRef = React.useRef(null);
+  const minTimePassed = React.useRef(false);
+  const isVideoPlayingRef = React.useRef(false);
+
+  const tryDismissLoader = React.useCallback(() => {
+    if (minTimePassed.current && isVideoPlayingRef.current) {
+      setIsVideoLoading(false);
+      if (onVideoLoaded) onVideoLoaded();
+    }
+  }, [onVideoLoaded]);
+
+  const markVideoPlaying = React.useCallback(() => {
+    if (!isVideoPlayingRef.current) {
+      isVideoPlayingRef.current = true;
+      tryDismissLoader();
+    }
+  }, [tryDismissLoader]);
+
+  React.useEffect(() => {
+    // Lock scroll while initial video is loading
+    if (isVideoLoading) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isVideoLoading]);
+
+  React.useEffect(() => {
+    // 1. Minimum display time of 1300ms for smooth branding presence
+    const minTimer = setTimeout(() => {
+      minTimePassed.current = true;
+      tryDismissLoader();
+    }, 1300);
+
+    // 2. Safe fallback after 5s in case video is blocked or offline
+    const fallbackTimer = setTimeout(() => {
+      minTimePassed.current = true;
+      isVideoPlayingRef.current = true;
+      setIsVideoLoading(false);
+      if (onVideoLoaded) onVideoLoaded();
+    }, 5000);
+
+    // 3. Actively kick-start video playback with explicit muted property
+    const video = videoRef.current;
+    if (video) {
+      video.muted = true;
+      video.playsInline = true;
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+
+      const onTimeUpdate = () => {
+        if (video.currentTime >= 0.1) {
+          markVideoPlaying();
+        }
+      };
+
+      video.addEventListener('timeupdate', onTimeUpdate);
+      video.addEventListener('playing', () => {
+        setTimeout(() => {
+          if (video.currentTime >= 0.05) markVideoPlaying();
+        }, 150);
+      });
+
+      return () => {
+        clearTimeout(minTimer);
+        clearTimeout(fallbackTimer);
+        video.removeEventListener('timeupdate', onTimeUpdate);
+      };
+    }
+
+    return () => {
+      clearTimeout(minTimer);
+      clearTimeout(fallbackTimer);
+    };
+  }, [markVideoPlaying, tryDismissLoader, onVideoLoaded]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -29,12 +110,151 @@ const Hero = ({ setCurrentPage }) => {
   return (
     <section id="hero" className="section" style={{ position: 'relative', overflow: 'hidden', backgroundColor: theme.colors.surface }}>
 
+      {/* Full-Screen Pure Blank/Cosmic Loading Screen (vanishing once hero video is ready) */}
+      <AnimatePresence>
+        {isVideoLoading && (
+          <motion.div
+            key="celestial-preloader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.75, ease: 'easeInOut' } }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 999999,
+              backgroundColor: '#05030a',
+              backgroundImage: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(212,175,55,0.07) 0%, #05030a 75%)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '24px',
+              textAlign: 'center',
+              pointerEvents: 'auto',
+              userSelect: 'none',
+            }}
+          >
+            {/* Spinning Sacred Geometry Rings */}
+            <div style={{ position: 'relative', width: '130px', height: '130px', marginBottom: '28px' }}>
+              {/* Outer Counter-Rotating Ring with Vedic Accent Marks */}
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  border: '1.5px dashed rgba(212, 175, 55, 0.45)',
+                  borderRadius: '50%',
+                  boxShadow: '0 0 25px rgba(212, 175, 55, 0.15)',
+                }}
+              />
+              {/* Middle Rotating Ring */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+                style={{
+                  position: 'absolute',
+                  inset: '12px',
+                  border: '2px solid transparent',
+                  borderTopColor: '#d4af37',
+                  borderBottomColor: '#f5d76e',
+                  borderRadius: '50%',
+                  boxShadow: '0 0 15px rgba(212, 175, 55, 0.3)',
+                }}
+              />
+              {/* Pulsing Core Mandala Glow */}
+              <motion.div
+                animate={{ scale: [0.85, 1.15, 0.85], opacity: [0.5, 0.95, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                  position: 'absolute',
+                  inset: '26px',
+                  background: 'radial-gradient(circle, rgba(212,175,55,0.3) 0%, rgba(139,38,30,0.15) 60%, transparent 80%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2rem',
+                  color: '#ffd700',
+                  textShadow: '0 0 20px rgba(212,175,55,0.8)',
+                }}
+              >
+                🕉️
+              </motion.div>
+            </div>
+
+            {/* Academy Branding */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontFamily: 'var(--font-heading)',
+              color: '#d4af37',
+              fontSize: '0.8rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '10px',
+              fontWeight: 700,
+            }}>
+              <span>✦</span> MANNJYOTISH <span>✦</span>
+            </div>
+
+            <h2 style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: 'clamp(1.4rem, 3vw, 1.8rem)',
+              color: '#ffffff',
+              letterSpacing: '0.04em',
+              margin: '0 0 8px',
+              fontWeight: 600,
+              textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+            }}>
+              Aligning Celestial Energies
+            </h2>
+
+            <p style={{
+              fontFamily: 'var(--font-body)',
+              color: 'rgba(255,255,255,0.45)',
+              fontSize: '0.82rem',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              maxWidth: '360px',
+            }}>
+              Rooted in Radhavallabh Tradition · Vrindavan Dham
+            </p>
+
+            {/* Animated Golden Progress Bar */}
+            <div style={{
+              width: '180px',
+              height: '3px',
+              backgroundColor: 'rgba(212, 175, 55, 0.15)',
+              borderRadius: '3px',
+              overflow: 'hidden',
+              position: 'relative',
+            }}>
+              <motion.div
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                  width: '50%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, #ffd700, #d4af37, transparent)',
+                  borderRadius: '3px',
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Aurora shimmer — always visible on dark theme */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-          background: 'radial-gradient(ellipse 70% 50% at 30% 20%, rgba(212,175,55,0.06) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 70% 80%, rgba(100,60,180,0.05) 0%, transparent 70%)',
-          pointerEvents: 'none', zIndex: 0, animation: 'aurora-shift 12s ease-in-out infinite alternate'
-        }} />
+      <div style={{
+        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+        background: 'radial-gradient(ellipse 70% 50% at 30% 20%, rgba(212,175,55,0.06) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 70% 80%, rgba(100,60,180,0.05) 0%, transparent 70%)',
+        pointerEvents: 'none', zIndex: 0, animation: 'aurora-shift 12s ease-in-out infinite alternate'
+      }} />
 
       {/* Mandala background layer — behind all content, left-side anchor */}
       <MandalaArt
@@ -75,15 +295,24 @@ const Hero = ({ setCurrentPage }) => {
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%)',
       }}>
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
+          preload="auto"
+          onTimeUpdate={(e) => {
+            if (e.target.currentTime >= 0.1) {
+              markVideoPlaying();
+            }
+          }}
+          onPlaying={markVideoPlaying}
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            opacity: 0.45
+            opacity: isVideoLoading ? 0 : 0.45,
+            transition: 'opacity 0.8s ease-in-out'
           }}
         >
           <source src="/hero-animation/hero-1.mp4" type="video/mp4" />
@@ -192,36 +421,76 @@ const Hero = ({ setCurrentPage }) => {
                   border: `1px solid ${theme.colors.primary}44`
                 }}
               />
-              {/* View More overlay button */}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2 }}
-                whileHover={{ scale: 1.07, boxShadow: `0 12px 40px rgba(212,175,55,0.5)` }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  if (isLoggedIn) {
+              {/* Action Buttons below image */}
+              <div style={{
+                position: 'absolute',
+                bottom: '14px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                alignItems: 'center',
+                width: '88%',
+                maxWidth: '260px'
+              }}>
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.0 }}
+                  whileHover={{ scale: 1.05, boxShadow: `0 12px 35px rgba(212,175,55,0.5)` }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
                     setCurrentPage('gallery');
-                  } else {
-                    setShowLogin(true);
-                  }
-                }}
-                style={{
-                  position: 'absolute', bottom: '16px', left: '50%',
-                  transform: 'translateX(-50%)',
-                  padding: '10px 28px', borderRadius: '30px',
-                  background: 'linear-gradient(135deg, rgba(212,175,55,0.95), rgba(184,134,11,0.95))',
-                  border: 'none', color: '#000',
-                  fontFamily: 'var(--font-heading)', fontWeight: 800,
-                  fontSize: '0.9rem', cursor: 'pointer',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 8px 30px rgba(212,175,55,0.35)',
-                  letterSpacing: '0.05em',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                ✦ View More
-              </motion.button>
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '8px 22px',
+                    borderRadius: '30px',
+                    background: 'linear-gradient(135deg, rgba(212,175,55,0.95), rgba(184,134,11,0.95))',
+                    border: 'none',
+                    color: '#000',
+                    fontFamily: 'var(--font-heading)',
+                    fontWeight: 800,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(8px)',
+                    boxShadow: '0 6px 20px rgba(212,175,55,0.35)',
+                    letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  ✦ View More
+                </motion.button>
+
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2 }}
+                  whileHover={{ scale: 1.05, backgroundColor: 'rgba(212,175,55,0.22)', borderColor: theme.colors.primary }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setCurrentPage('about-acharya')}
+                  style={{
+                    width: '100%',
+                    padding: '7px 20px',
+                    borderRadius: '30px',
+                    background: 'rgba(12, 12, 18, 0.85)',
+                    border: `1.5px solid ${theme.colors.primary}99`,
+                    color: theme.colors.primary,
+                    fontFamily: 'var(--font-heading)',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(8px)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
+                    letterSpacing: '0.03em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  ✦ About Acharya Ji
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         </div>

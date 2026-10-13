@@ -104,7 +104,7 @@ export default function AiChatbot({ onBookService }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([{
     id: 1, sender: 'bot',
-    text: "🙏 Namaste! I am Jyotish AI. I can tell you about our services and book your appointment right here in chat! What would you like to know?",
+    text: "🙏 Namaste! I am Astra, your Vedic AI companion. I can answer your astrology queries, explain our sacred services, and book your consultation right here in chat! What would you like to know?",
   }]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -232,7 +232,7 @@ export default function AiChatbot({ onBookService }) {
         }
       } catch (err) {
         addBotMessage(
-          `⚠️ Could not submit automatically. Please contact Ashay ji directly:\n📱 **WhatsApp: +91 92438 18146**\n\nMention: ${bookingService.title} on ${bookingData.date} at ${bookingData.time}`
+          `⚠️ Could not submit automatically. Please contact Ashay ji directly:\n📱 **WhatsApp: +91 70007 42315**\n\nMention: ${bookingService.title} on ${bookingData.date} at ${bookingData.time}`
         );
       }
       setBookingStep(null);
@@ -352,7 +352,7 @@ export default function AiChatbot({ onBookService }) {
         }}
       >
         <Sparkles size={18} />
-        <span>Ask Jyotish AI</span>
+        <span>Ask Astra</span>
       </motion.button>
 
       {/* Chat Window */}
@@ -389,7 +389,7 @@ export default function AiChatbot({ onBookService }) {
                 </div>
                 <div>
                   <h4 style={{ margin: 0, color: '#d4af37', fontFamily: 'var(--font-heading)', fontSize: '0.9rem' }}>
-                    Jyotish AI
+                    Astra · Vedic AI
                   </h4>
                   <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)' }}>
                     {bookingStep ? `📝 Booking: ${bookingService?.title}` : '✦ Ask me anything · Book in chat'}

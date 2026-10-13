@@ -1,0 +1,52 @@
+[
+  {
+    "id": "rev-1",
+    "userName": "Priya Sharma",
+    "city": "Delhi",
+    "rating": 5,
+    "text": "Ashay ji's guidance on my marriage timing was incredibly accurate. The remedies provided brought immediate peace to our family. Highly recommended!",
+    "isApproved": true,
+    "isFeatured": true,
+    "createdAt": "2026-08-15T10:00:00.000Z"
+  },
+  {
+    "id": "rev-2",
+    "userName": "Rahul Verma",
+    "city": "Mumbai",
+    "rating": 5,
+    "text": "Got my Kundli analyzed and the career predictions were spot on. Very detailed, genuine, and compassionate guidance grounded in true Vedic principles.",
+    "isApproved": true,
+    "isFeatured": true,
+    "createdAt": "2026-08-18T14:30:00.000Z"
+  },
+  {
+    "id": "rev-3",
+    "userName": "Sneha Patel",
+    "city": "Ahmedabad",
+    "rating": 5,
+    "text": "The Vastu and Navagraha consultation transformed our home's energy completely. A truly gifted and humble astrologer of the holy Vrindavan lineage.",
+    "isApproved": true,
+    "isFeatured": true,
+    "createdAt": "2026-08-22T09:15:00.000Z"
+  },
+  {
+    "id": "rev-4",
+    "userName": "Ananya Iyer",
+    "city": "Bangalore",
+    "rating": 5,
+    "text": "Attended the Jyotish Foundation workshop and had a personal consultation. The depth of knowledge and clarity of explanation is unmatched.",
+    "isApproved": true,
+    "isFeatured": true,
+    "createdAt": "2026-09-01T16:00:00.000Z"
+  },
+  {
+    "id": "rev-5",
+    "userName": "Vikramaditya Singh",
+    "city": "Jaipur",
+    "rating": 5,
+    "text": "The Rudrabhishek puja was performed with flawless Vedic mantras and devotion. We received live updates and the prasad box arrived safely. Blessed!",
+    "isApproved": true,
+    "isFeatured": true,
+    "createdAt": "2026-09-10T11:45:00.000Z"
+  }
+]

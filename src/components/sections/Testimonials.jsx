@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import SectionHeading from '../ui/SectionHeading';
 import MandalaArt from '../ui/MandalaArt';
+import ReviewModal from '../ui/ReviewModal';
 
 const QUOTE_MARK_SVG = `<path fill="currentColor" d="M9 7c-3 0-5 2.5-5 6s2 6 5 6h1v-4H9c-1 0-2-1-2-3s1-3 2-3h1V7H9zm10 0c-3 0-5 2.5-5 6s2 6 5 6h1v-4h-1c-1 0-2-1-2-3s1-3 2-3h1V7h-1z"/>`;
 
@@ -40,14 +41,35 @@ const TestimonialStarsAndQuotes = ({ primaryColor = 'var(--color-primary)' }) =>
   </div>
 );
 
+const API_BASE = import.meta.env.VITE_API_BASE || '';
+
+const DEFAULT_REVIEWS = [
+  { id: '1', userName: "Priya Sharma", city: "Delhi", text: "Ashay ji's guidance on my marriage timing was incredibly accurate. Highly recommended.", rating: 5 },
+  { id: '2', userName: "Rahul Verma", city: "Mumbai", text: "Got my Kundli analyzed and the career predictions were spot on. Very detailed and genuine.", rating: 5 },
+  { id: '3', userName: "Sneha Patel", city: "Ahmedabad", text: "The Vastu consultation transformed our home's energy completely. A truly gifted astrologer.", rating: 5 },
+  { id: '4', userName: "Ananya Iyer", city: "Bangalore", text: "Attended the Jyotish Foundation workshop and had a consultation. The clarity and depth is unmatched.", rating: 5 },
+  { id: '5', userName: "Vikramaditya Singh", city: "Jaipur", text: "The Rudrabhishek puja was performed with flawless Vedic devotion. Blessed guidance!", rating: 5 }
+];
+
 const Testimonials = () => {
   const theme = useTheme();
+  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
-  const testimonials = [
-    { name: "Priya Sharma", city: "Delhi", text: "Ashay ji's guidance on my marriage timing was incredibly accurate. Highly recommended.", rating: 5 },
-    { name: "Rahul Verma", city: "Mumbai", text: "Got my Kundli analyzed and the career predictions were spot on. Very detailed and genuine.", rating: 5 },
-    { name: "Sneha Patel", city: "Ahmedabad", text: "The Vastu consultation transformed our home's energy completely. A truly gifted astrologer.", rating: 5 }
-  ];
+  const fetchFeatured = () => {
+    fetch(`${API_BASE}/api/reviews/featured`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setReviews(data.data.slice(0, 5));
+        }
+      })
+      .catch(() => {});
+  };
+
+  React.useEffect(() => {
+    fetchFeatured();
+  }, []);
 
   const getInitials = (name) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -101,74 +123,113 @@ const Testimonials = () => {
           marginTop: '60px'
         }}
       >
-        {testimonials.map((testimonial, index) => (
-          <motion.div 
-            key={index} 
-            variants={itemVariants}
-            className="glass-panel"
-            whileHover={{ y: -5 }}
-            style={{
-              padding: '32px',
-              borderRadius: '16px',
-              border: '1px solid var(--border-gold)',
-              borderTop: `3px solid var(--color-secondary)`,
-              display: 'flex',
-              flexDirection: 'column',
-              background: 'linear-gradient(160deg, var(--color-surface) 0%, var(--color-surface-variant) 55%, var(--color-primary-container) 100%)',
-            }}
-          >
-            {/* Header: Avatar and Rating */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                backgroundColor: '#ffffff',
-                color: '#231a13', /* dark text for initials inside white circle */
+        {reviews.map((r, index) => {
+          const authorName = r.userName || r.name || 'Seeker';
+          const authorCity = r.city || 'India';
+          return (
+            <motion.div 
+              key={r.id || index} 
+              variants={itemVariants}
+              className="glass-panel"
+              whileHover={{ y: -5 }}
+              style={{
+                padding: '32px',
+                borderRadius: '16px',
+                border: '1px solid var(--border-gold)',
+                borderTop: `3px solid var(--color-secondary)`,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'var(--font-heading)',
-                fontWeight: '700',
-                fontSize: '1.2rem',
-                border: `2px solid ${theme.colors.primary}33`,
-                boxShadow: '0 4px 10px rgba(0,0,0,0.05)'
+                flexDirection: 'column',
+                background: 'linear-gradient(160deg, var(--color-surface) 0%, var(--color-surface-variant) 55%, var(--color-primary-container) 100%)',
+              }}
+            >
+              {/* Header: Avatar and Rating */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  backgroundColor: '#ffffff',
+                  color: '#231a13',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: 'var(--font-heading)',
+                  fontWeight: '700',
+                  fontSize: '1.2rem',
+                  border: `2px solid ${theme.colors.primary}33`,
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.05)'
+                }}>
+                  {getInitials(authorName)}
+                </div>
+                
+                <div style={{ color: 'var(--color-primary)', display: 'flex', gap: '4px' }}>
+                  {[...Array(r.rating || 5)].map((_, i) => (
+                    <span key={i} style={{ fontSize: '1.2rem' }}>★</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quote Text */}
+              <p style={{ 
+                fontStyle: 'italic', 
+                fontSize: '0.98rem', 
+                lineHeight: '1.6',
+                color: theme.colors.text,
+                opacity: 0.9,
+                flexGrow: 1,
+                marginBottom: '24px'
               }}>
-                {getInitials(testimonial.name)}
-              </div>
-              
-              <div style={{ color: 'var(--color-primary)', display: 'flex', gap: '4px' }}>
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <span key={i} style={{ fontSize: '1.2rem' }}>★</span>
-                ))}
-              </div>
-            </div>
+                "{r.text}"
+              </p>
 
-            {/* Quote Text */}
-            <p style={{ 
-              fontStyle: 'italic', 
-              fontSize: '1rem', 
-              lineHeight: '1.6',
-              color: theme.colors.text,
-              opacity: 0.9,
-              flexGrow: 1,
-              marginBottom: '24px'
-            }}>
-              "{testimonial.text}"
-            </p>
-
-            {/* Author */}
-            <div>
-              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', color: theme.colors.primary, marginBottom: '4px' }}>
-                {testimonial.name}
+              {/* Author */}
+              <div>
+                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', color: theme.colors.primary, marginBottom: '4px' }}>
+                  {authorName}
+                </div>
+                <div style={{ fontSize: '0.85rem', color: theme.colors.secondary, fontWeight: '500', letterSpacing: '0.03em' }}>
+                  {authorCity}
+                </div>
               </div>
-              <div style={{ fontSize: '0.85rem', color: theme.colors.secondary, fontWeight: '500', letterSpacing: '0.03em' }}>
-                {testimonial.city}
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </motion.div>
+
+      {/* Write a Review Button */}
+      <div style={{ marginTop: '48px', textAlign: 'center' }}>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsReviewModalOpen(true)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 30px',
+            borderRadius: '30px',
+            background: 'rgba(212, 175, 55, 0.12)',
+            border: `1.5px solid ${theme.colors.primary}`,
+            color: theme.colors.primary,
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 700,
+            fontSize: '0.92rem',
+            cursor: 'pointer',
+            transition: 'all 0.25s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(212,175,55,0.22)'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(212,175,55,0.12)'; }}
+        >
+          <span>✍️</span>
+          <span>Share Your Experience (Write a Review)</span>
+        </motion.button>
+      </div>
+
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        onSuccess={() => fetchFeatured()}
+      />
       </div>
     </motion.section>
   );

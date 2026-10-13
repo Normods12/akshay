@@ -1,0 +1,172 @@
+[
+  {
+    "batchId": "BATCH-1790757016966",
+    "mode": "mock",
+    "timestamp": "2026-09-30T08:30:18.243Z",
+    "totalSent": 4,
+    "batch": "DST1C - 25 LAKHS",
+    "month": "3RD MONTH OCT-2026",
+    "items": [
+      {
+        "batchId": "BATCH-1790757016966",
+        "subscriberId": "DST1C-01",
+        "tNo": "DST1C-01",
+        "name": "Sri Venkateshwara Book Agency",
+        "phone": "919930663231",
+        "amount": 92500,
+        "month": "3RD MONTH OCT-2026",
+        "dueDate": "2026-10-05",
+        "status": "Delivered",
+        "channel": "Mock BSP API (Local Sandbox)",
+        "messageId": "wamid.HBgM919930663231V1CJ7Z3K47==",
+        "renderedText": "🔔 *DMR CHIT FUND PVT LTD*\n*Batch: DST1C - 25 LAKHS • PSO: MM270826P567*\n\nHi *Sri Venkateshwara Book Agency*, this is a friendly reminder for your chit installment (*T-No: DST1C-01*).\n\n💰 *Amount Due:* ₹92,500\n🗓️ *Month:* 3RD MONTH OCT-2026\n📅 *Due Date:* 05-10-2026\n⏳ *Days Remaining:* 13 Days\n\n━━━━━━━━━━━━━━━━━━━━━\n*Quick Reply Options:*\n👉 Reply *PAID* if already transferred\n👉 Reply *PAY* to view Bank & UPI details\n👉 Reply *STATUS* to check your chit balance\n👉 Reply *CALL* to connect with the manager\n━━━━━━━━━━━━━━━━━━━━━\n_DMR Chit Fund Pvt Ltd Automated Desk_",
+        "timestamp": "2026-09-30T08:30:17.318Z",
+        "simulatedLatencyMs": 268,
+        "apiTelemetry": {
+          "httpStatus": 200,
+          "provider": "Meta Business Solution Provider (Direct Gateway)",
+          "recipient_type": "individual",
+          "pricing": {
+            "category": "utility_reminder",
+            "billable": false
+          }
+        }
+      },
+      {
+        "batchId": "BATCH-1790757016966",
+        "subscriberId": "DST1C-02",
+        "tNo": "DST1C-02",
+        "name": "Gopireddy Madhu Mohan Reddy",
+        "phone": "919848062164",
+        "amount": 92500,
+        "month": "3RD MONTH OCT-2026",
+        "dueDate": "2026-10-05",
+        "status": "Delivered",
+        "channel": "Mock BSP API (Local Sandbox)",
+        "messageId": "wamid.HBgM919848062164V1O6VG44XN==",
+        "renderedText": "🔔 *DMR CHIT FUND PVT LTD*\n*Batch: DST1C - 25 LAKHS • PSO: MM270826P567*\n\nHi *Gopireddy Madhu Mohan Reddy*, this is a friendly reminder for your chit installment (*T-No: DST1C-02*).\n\n💰 *Amount Due:* ₹92,500\n🗓️ *Month:* 3RD MONTH OCT-2026\n📅 *Due Date:* 05-10-2026\n⏳ *Days Remaining:* 13 Days\n\n━━━━━━━━━━━━━━━━━━━━━\n*Quick Reply Options:*\n👉 Reply *PAID* if already transferred\n👉 Reply *PAY* to view Bank & UPI details\n👉 Reply *STATUS* to check your chit balance\n👉 Reply *CALL* to connect with the manager\n━━━━━━━━━━━━━━━━━━━━━\n_DMR Chit Fund Pvt Ltd Automated Desk_",
+        "timestamp": "2026-09-30T08:30:17.621Z",
+        "simulatedLatencyMs": 224,
+        "apiTelemetry": {
+          "httpStatus": 200,
+          "provider": "Meta Business Solution Provider (Direct Gateway)",
+          "recipient_type": "individual",
+          "pricing": {
+            "category": "utility_reminder",
+            "billable": false
+          }
+        }
+      },
+      {
+        "batchId": "BATCH-1790757016966",
+        "subscriberId": "DST1C-04",
+        "tNo": "DST1C-04",
+        "name": "B. Lakshmi Devi",
+        "phone": "918123456780",
+        "amount": 92500,
+        "month": "3RD MONTH OCT-2026",
+        "dueDate": "2026-10-05",
+        "status": "Delivered",
+        "channel": "Mock BSP API (Local Sandbox)",
+        "messageId": "wamid.HBgM918123456780V1Y8EIPS15==",
+        "renderedText": "🔔 *DMR CHIT FUND PVT LTD*\n*Batch: DST1C - 25 LAKHS • PSO: MM270826P567*\n\nHi *B. Lakshmi Devi*, this is a friendly reminder for your chit installment (*T-No: DST1C-04*).\n\n💰 *Amount Due:* ₹92,500\n🗓️ *Month:* 3RD MONTH OCT-2026\n📅 *Due Date:* 05-10-2026\n⏳ *Days Remaining:* 13 Days\n\n━━━━━━━━━━━━━━━━━━━━━\n*Quick Reply Options:*\n👉 Reply *PAID* if already transferred\n👉 Reply *PAY* to view Bank & UPI details\n👉 Reply *STATUS* to check your chit balance\n👉 Reply *CALL* to connect with the manager\n━━━━━━━━━━━━━━━━━━━━━\n_DMR Chit Fund Pvt Ltd Automated Desk_",
+        "timestamp": "2026-09-30T08:30:17.922Z",
+        "simulatedLatencyMs": 208,
+        "apiTelemetry": {
+          "httpStatus": 200,
+          "provider": "Meta Business Solution Provider (Direct Gateway)",
+          "recipient_type": "individual",
+          "pricing": {
+            "category": "utility_reminder",
+            "billable": false
+          }
+        }
+      },
+      {
+        "batchId": "BATCH-1790757016966",
+        "subscriberId": "DST1C-05",
+        "tNo": "DST1C-05",
+        "name": "M. Ravi Kumar",
+        "phone": "919000011122",
+        "amount": 92500,
+        "month": "3RD MONTH OCT-2026",
+        "dueDate": "2026-10-05",
+        "status": "Delivered",
+        "channel": "Mock BSP API (Local Sandbox)",
+        "messageId": "wamid.HBgM919000011122V13CHOHIQ9==",
+        "renderedText": "🔔 *DMR CHIT FUND PVT LTD*\n*Batch: DST1C - 25 LAKHS • PSO: MM270826P567*\n\nHi *M. Ravi Kumar*, this is a friendly reminder for your chit installment (*T-No: DST1C-05*).\n\n💰 *Amount Due:* ₹92,500\n🗓️ *Month:* 3RD MONTH OCT-2026\n📅 *Due Date:* 05-10-2026\n⏳ *Days Remaining:* 13 Days\n\n━━━━━━━━━━━━━━━━━━━━━\n*Quick Reply Options:*\n👉 Reply *PAID* if already transferred\n👉 Reply *PAY* to view Bank & UPI details\n👉 Reply *STATUS* to check your chit balance\n👉 Reply *CALL* to connect with the manager\n━━━━━━━━━━━━━━━━━━━━━\n_DMR Chit Fund Pvt Ltd Automated Desk_",
+        "timestamp": "2026-09-30T08:30:18.237Z",
+        "simulatedLatencyMs": 199,
+        "apiTelemetry": {
+          "httpStatus": 200,
+          "provider": "Meta Business Solution Provider (Direct Gateway)",
+          "recipient_type": "individual",
+          "pricing": {
+            "category": "utility_reminder",
+            "billable": false
+          }
+        }
+      }
+    ]
+  },
+  {
+    "batchId": "BATCH-1790748857641",
+    "mode": "mock",
+    "timestamp": "2026-09-30T06:14:18.316Z",
+    "totalSent": 2,
+    "batch": "DST1C - 25 LAKHS",
+    "month": "3RD MONTH OCT-2026",
+    "items": [
+      {
+        "batchId": "BATCH-1790748857641",
+        "subscriberId": "DST1C-01",
+        "tNo": "DST1C-01",
+        "name": "Sri Venkateshwara Book Agency",
+        "phone": "919930663231",
+        "amount": 92500,
+        "month": "3RD MONTH OCT-2026",
+        "dueDate": "2026-10-05",
+        "status": "Delivered",
+        "channel": "Mock BSP API (Local Sandbox)",
+        "messageId": "wamid.HBgM919930663231V1WWO811TH==",
+        "renderedText": "🔔 *DMR CHIT FUND PVT LTD*\n*Batch: DST1C - 25 LAKHS • PSO: MM270826P567*\n\nHi *Sri Venkateshwara Book Agency*, this is a friendly reminder for your chit installment (*T-No: DST1C-01*).\n\n💰 *Amount Due:* ₹92,500\n🗓️ *Month:* 3RD MONTH OCT-2026\n📅 *Due Date:* 05-10-2026\n⏳ *Days Remaining:* 13 Days\n\n━━━━━━━━━━━━━━━━━━━━━\n*Quick Reply Options:*\n👉 Reply *PAID* if already transferred\n👉 Reply *PAY* to view Bank & UPI details\n👉 Reply *STATUS* to check your chit balance\n👉 Reply *CALL* to connect with the manager\n━━━━━━━━━━━━━━━━━━━━━\n_DMR Chit Fund Pvt Ltd Automated Desk_",
+        "timestamp": "2026-09-30T06:14:17.998Z",
+        "simulatedLatencyMs": 259,
+        "apiTelemetry": {
+          "httpStatus": 200,
+          "provider": "Meta Business Solution Provider (Direct Gateway)",
+          "recipient_type": "individual",
+          "pricing": {
+            "category": "utility_reminder",
+            "billable": false
+          }
+        }
+      },
+      {
+        "batchId": "BATCH-1790748857641",
+        "subscriberId": "DST1C-02",
+        "tNo": "DST1C-02",
+        "name": "Gopireddy Madhu Mohan Reddy",
+        "phone": "919848062164",
+        "amount": 92500,
+        "month": "3RD MONTH OCT-2026",
+        "dueDate": "2026-10-05",
+        "status": "Delivered",
+        "channel": "Mock BSP API (Local Sandbox)",
+        "messageId": "wamid.HBgM919848062164V10ULP7AVV==",
+        "renderedText": "🔔 *DMR CHIT FUND PVT LTD*\n*Batch: DST1C - 25 LAKHS • PSO: MM270826P567*\n\nHi *Gopireddy Madhu Mohan Reddy*, this is a friendly reminder for your chit installment (*T-No: DST1C-02*).\n\n💰 *Amount Due:* ₹92,500\n🗓️ *Month:* 3RD MONTH OCT-2026\n📅 *Due Date:* 05-10-2026\n⏳ *Days Remaining:* 13 Days\n\n━━━━━━━━━━━━━━━━━━━━━\n*Quick Reply Options:*\n👉 Reply *PAID* if already transferred\n👉 Reply *PAY* to view Bank & UPI details\n👉 Reply *STATUS* to check your chit balance\n👉 Reply *CALL* to connect with the manager\n━━━━━━━━━━━━━━━━━━━━━\n_DMR Chit Fund Pvt Ltd Automated Desk_",
+        "timestamp": "2026-09-30T06:14:18.315Z",
+        "simulatedLatencyMs": 265,
+        "apiTelemetry": {
+          "httpStatus": 200,
+          "provider": "Meta Business Solution Provider (Direct Gateway)",
+          "recipient_type": "individual",
+          "pricing": {
+            "category": "utility_reminder",
+            "billable": false
+          }
+        }
+      }
+    ]
+  }
+]

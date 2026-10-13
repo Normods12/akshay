@@ -102,6 +102,7 @@ const Navbar = ({ currentPage, setCurrentPage }) => {
     { label: 'Courses', action: () => { setCurrentPage('courses'); setMobileOpen(false); } },
     { label: 'Shop', action: () => { setCurrentPage('shop'); setMobileOpen(false); } },
     { label: 'Consultation', action: () => handleHomeScroll('booking-form') },
+    { label: 'Sacred Gallery', action: () => { setCurrentPage('gallery'); setMobileOpen(false); } },
   ];
 
   return (
@@ -202,6 +203,12 @@ const Navbar = ({ currentPage, setCurrentPage }) => {
 
         <motion.li whileHover={{ y: -2 }}>
           <a href="#" onClick={(e) => { e.preventDefault(); handleHomeScroll('booking-form'); }} style={{ color: 'inherit', transition: 'color 0.3s ease', textDecoration: 'none' }}>Consultation</a>
+        </motion.li>
+
+        <motion.li whileHover={{ y: -2 }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); setCurrentPage('gallery'); }} style={{ color: currentPage === 'gallery' ? theme.colors.primary : 'inherit', transition: 'color 0.3s ease', textDecoration: 'none' }}>
+            Sacred Gallery
+          </a>
         </motion.li>
         {isAdmin && (
           <motion.li whileHover={{ y: -2 }}>

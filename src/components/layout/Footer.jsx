@@ -12,7 +12,7 @@ const Footer = () => {
       marginTop: 'auto',
     }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px', marginBottom: '20px', fontSize: '0.95rem' }}>
-        <span>📞 Contact: <a href="tel:+919243818146" style={{ color: theme.colors.primary, textDecoration: 'none', fontWeight: 600 }}>+91 92438 18146</a></span>
+        <span>📞 Contact: <a href="tel:+917000742315" style={{ color: theme.colors.primary, textDecoration: 'none', fontWeight: 600 }}>+91 70007 42315</a></span>
         <span>💬 WhatsApp: <a href="https://wa.me/917000742315" target="_blank" rel="noopener noreferrer" style={{ color: '#25D366', textDecoration: 'none', fontWeight: 600 }}>+91 70007 42315</a></span>
         <span>📸 Instagram: <a href="https://www.instagram.com/goswami_ashay" target="_blank" rel="noopener noreferrer" style={{ color: theme.colors.primary, textDecoration: 'none', fontWeight: 600 }}>@goswami_ashay</a></span>
       </div>
