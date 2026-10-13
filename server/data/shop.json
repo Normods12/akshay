@@ -1,13 +1,5 @@
 [
   {
-    "id": "6d1a3217-06e1-43da-9697-734faa8edd6a",
-    "title": "Test_Item",
-    "price": "5000",
-    "category": "Gems",
-    "image": "/uploads/d0e6a97d-cc2b-45bb-aa52-d16c4d247650.png",
-    "createdAt": "2026-08-09T06:57:35.983Z"
-  },
-  {
     "id": "shop-1",
     "title": "Gemstones",
     "price": "Starting from ₹1,999",

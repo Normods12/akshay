@@ -1,18 +1,5 @@
 [
   {
-    "id": "5360deb1-1820-436a-8ceb-efef31d5c054",
-    "title": "Test Puja",
-    "price": "23000",
-    "category": "",
-    "description": "XYZ",
-    "benefits": [
-      "A\r",
-      "B"
-    ],
-    "image": "/uploads/95805864-3a01-4607-92f7-d3b2d2315ac2.png",
-    "createdAt": "2026-08-08T17:22:01.873Z"
-  },
-  {
     "id": "puja-1",
     "title": "Navagraha Shanti Puja",
     "price": "₹31,000",

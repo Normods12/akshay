@@ -22,6 +22,7 @@ const { calculateKundali, calculateMatch } = require('./src/kundliEngine');
 const { localToUTC } = require('./src/timezone');
 const { readData, writeData } = require('./src/dataStore');
 const { verifyToken, requireAdmin, JWT_SECRET } = require('./src/authMiddleware');
+const { sendWhatsApp } = require('./src/whatsapp');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -1026,6 +1027,23 @@ app.post('/api/bookings', async (req, res) => {
       }
     } catch (e) {
       console.error('Error sending Resend booking emails:', e);
+    }
+
+    // ── WhatsApp notification to admin (non-blocking) ──────────────────────────
+    const adminWhatsAppNumber = process.env.ADMIN_WHATSAPP_NUMBER;
+    if (adminWhatsAppNumber) {
+      sendWhatsApp({
+        to: adminWhatsAppNumber,
+        body: [
+          `🪔 *New Booking — ${newBooking.serviceTitle}*`,
+          `👤 Client: ${name}`,
+          `📱 WhatsApp: ${whatsapp}`,
+          `📅 Date & Time: ${newBooking.bookingDate} at ${newBooking.bookingTimeSlot}`,
+          `💰 Price: ${newBooking.servicePrice || 'N/A'}`,
+          `📝 Notes: ${notes || 'None'}`,
+          `🔗 Manage: https://mannjyotish.com/admin`,
+        ].join('\n'),
+      }).catch(err => console.warn('[whatsapp:booking-notify]', err.message));
     }
 
     res.json({ success: true, booking: newBooking, googleCalendarUrl: gCalUrl });
